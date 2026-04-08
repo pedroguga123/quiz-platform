@@ -7,7 +7,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  */
 export default function handler(_req: VercelRequest, res: VercelResponse) {
   res.setHeader('Content-Type', 'application/javascript');
-  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Cache-Control', 'no-store');
   res.send(`window.__env = ${JSON.stringify({
     SUPABASE_URL:      process.env.SUPABASE_URL      || '',
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || '',
