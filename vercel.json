@@ -12,12 +12,9 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/env",    "destination": "/api/env.ts" },
-    { "source": "/api/health", "destination": "/api/health.ts" },
-    { "source": "/q/:slug",    "destination": "/q.html" },
-    { "source": "/dashboard",  "destination": "/dashboard.html" },
-    { "source": "/builder",    "destination": "/builder.html" },
-    { "source": "/results",    "destination": "/results.html" },
-    { "source": "/(.*)",       "destination": "/index.html" }
+    { "source": "/q/:slug",   "destination": "/q.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/builder",   "destination": "/builder.html" },
+    { "source": "/results",   "destination": "/results.html" }
   ]
 }
