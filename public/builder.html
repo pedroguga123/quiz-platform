@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InLead — Builder</title>
+<script src="/api/env"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:    #0d0d12;
+    --paper:  #f7f5f0;
+    --accent: #5a3af7;
+    --glow:   #7c5cfc;
+    --soft:   #e8e4ff;
+    --muted:  #9190a4;
+    --border: #e2e0ee;
+    --danger: #e5484d;
+    --success:#22c55e;
+    --radius: 12px;
+    --left:   260px;
+    --right:  300px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    height: 56px; background: #fff; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 20px; gap: 12px;
+    flex-shrink: 0; z-index: 100;
+  }
+  .topbar-logo {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+    color: var(--accent); text-decoration: none; letter-spacing: -.5px; margin-right: 8px;
+  }
+  .topbar-logo span { color: var(--ink); }
+  .topbar-back {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--muted); cursor: pointer;
+    padding: 6px 10px; border-radius: 8px; border: none; background: none; transition: all .15s;
+  }
+  .topbar-back:hover { background: var(--paper); color: var(--ink); }
+  .quiz-title-input {
+    flex: 1; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    border: none; background: transparent; outline: none; color: var(--ink);
+    text-align: center; letter-spacing: -.3px;
+  }
+  .quiz-title-input::placeholder { color: var(--muted); font-weight: 400; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .btn-sm {
+    padding: 8px 16px; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all .15s; border: 1.5px solid var(--border);
+    background: transparent; color: var(--ink);
+  }
+  .btn-sm:hover { background: var(--paper); }
+  .btn-sm.primary {
+    background: var(--accent); color: #fff; border-color: transparent;
+    box-shadow: 0 2px 10px rgba(90,58,247,.3);
+  }
+  .btn-sm.primary:hover { background: var(--glow); }
+  .save-indicator { font-size: 12px; color: var(--muted); }
+
+  /* ── LAYOUT ── */
+  .builder-layout { flex: 1; display: flex; overflow: hidden; }
+
+  /* ── LEFT: STEPS LIST ── */
+  .steps-panel {
+    width: var(--left); background: #fff; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .steps-header {
+    padding: 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .steps-header h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+  .add-step-btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--soft); color: var(--accent); border: none;
+    font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .add-step-btn:hover { background: var(--accent); color: #fff; }
+  .steps-list { flex: 1; overflow-y: auto; padding: 8px; }
+  .step-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-radius: 10px;
+    cursor: pointer; transition: all .15s; margin-bottom: 2px;
+    border: 1.5px solid transparent;
+  }
+  .step-item:hover { background: var(--paper); }
+  .step-item.active { background: var(--soft); border-color: rgba(90,58,247,.25); }
+  .step-num {
+    width: 24px; height: 24px; border-radius: 7px;
+    background: var(--paper); color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .step-item.active .step-num { background: var(--accent); color: #fff; }
+  .step-text { flex: 1; font-size: 13px; font-weight: 400; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .step-type-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+    background: var(--paper); color: var(--muted); text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0;
+  }
+  .step-del {
+    opacity: 0; background: none; border: none; color: var(--danger);
+    cursor: pointer; padding: 2px; border-radius: 4px; font-size: 14px; transition: opacity .15s;
+  }
+  .step-item:hover .step-del { opacity: 1; }
+
+  /* ── CENTER: PREVIEW ── */
+  .preview-area {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 24px 0; overflow-y: auto; background: var(--paper);
+  }
+  .device-toggle {
+    display: flex; gap: 4px; background: #fff; border: 1px solid var(--border);
+    border-radius: 10px; padding: 4px; margin-bottom: 20px;
+  }
+  .device-btn {
+    padding: 6px 14px; border-radius: 7px; border: none; background: none;
+    font-size: 13px; cursor: pointer; transition: all .15s; color: var(--muted);
+  }
+  .device-btn.active { background: var(--accent); color: #fff; }
+  .device-frame {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.1);
+    overflow: hidden; transition: all .3s;
+    width: 480px;
+  }
+  .device-frame.mobile { width: 375px; }
+  .device-preview {
+    padding: 32px 28px; min-height: 480px;
+    display: flex; flex-direction: column;
+  }
+  .preview-question-type {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px;
+    color: var(--accent); margin-bottom: 20px;
+  }
+  .preview-title {
+    font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700;
+    letter-spacing: -.5px; margin-bottom: 8px; line-height: 1.2;
+  }
+  .preview-desc { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+  .preview-options { display: flex; flex-direction: column; gap: 10px; }
+  .preview-option {
+    padding: 14px 16px; border-radius: 10px;
+    border: 1.5px solid var(--border); font-size: 14px;
+    cursor: not-allowed; background: #fafafa; transition: all .15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .preview-option:first-child { border-color: var(--accent); background: var(--soft); }
+  .preview-input-mock {
+    width: 100%; padding: 14px 16px; border-radius: 10px;
+    border: 1.5px solid var(--border); font-family: 'DM Sans', sans-serif; font-size: 15px;
+    background: #fafafa; color: var(--muted); pointer-events: none;
+  }
+  .preview-btn-mock {
+    margin-top: 20px; padding: 15px 28px; border-radius: 50px;
+    background: var(--accent); color: #fff; font-size: 15px; font-weight: 500;
+    border: none; cursor: not-allowed; align-self: flex-start;
+  }
+
+  /* ── RIGHT: EDIT PANEL ── */
+  .edit-panel {
+    width: var(--right); background: #fff; border-left: 1px solid var(--border);
+    overflow-y: auto; padding: 0;
+  }
+  .panel-section { padding: 20px; border-bottom: 1px solid var(--border); }
+  .panel-section:last-child { border-bottom: none; }
+  .panel-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--muted); margin-bottom: 14px;
+  }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; font-weight: 500; color: #555; margin-bottom: 5px; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    outline: none; transition: border-color .2s; background: #fafafa; color: var(--ink);
+    resize: vertical;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); background: #fff; }
+  .field select { cursor: pointer; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+  .toggle {
+    width: 40px; height: 22px; border-radius: 50px;
+    background: var(--border); position: relative; cursor: pointer; transition: background .2s;
+    border: none; flex-shrink: 0;
+  }
+  .toggle.on { background: var(--accent); }
+  .toggle::after {
+    content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; top: 3px; left: 3px; transition: transform .2s;
+  }
+  .toggle.on::after { transform: translateX(18px); }
+
+  /* OPTIONS EDITOR */
+  .options-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .option-row {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--paper); border-radius: 8px; padding: 6px 8px;
+  }
+  .option-row input {
+    flex: 1; border: none; background: transparent; outline: none;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); padding: 2px;
+  }
+  .option-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 4px; border-radius: 4px; }
+  .option-del:hover { color: var(--danger); }
+  .add-option-btn {
+    width: 100%; padding: 9px; border-radius: 8px;
+    border: 1.5px dashed var(--border); background: transparent;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted);
+    cursor: pointer; transition: all .15s;
+  }
+  .add-option-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* TYPE PICKER */
+  .type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .type-btn {
+    padding: 10px 8px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: transparent; cursor: pointer; text-align: center;
+    font-size: 12px; color: var(--muted); transition: all .15s;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .type-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .type-btn.active { border-color: var(--accent); background: var(--soft); color: var(--accent); }
+  .type-icon { font-size: 18px; }
+
+  /* EMPTY PANEL */
+  .empty-panel {
+    padding: 40px 20px; text-align: center; color: var(--muted);
+  }
+  .empty-panel p { font-size: 13px; line-height: 1.6; }
+
+  /* ADD TYPE MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(13,13,18,.6); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 20px; padding: 28px;
+    width: 100%; max-width: 460px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.2);
+    animation: slideUp .25s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .modal h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .type-picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .type-picker-btn {
+    padding: 14px 8px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: transparent; cursor: pointer; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    transition: all .15s;
+  }
+  .type-picker-btn:hover { border-color: var(--accent); background: var(--soft); }
+  .type-picker-btn .ti { font-size: 24px; }
+  .type-picker-btn .tl { font-size: 12px; color: var(--ink); font-weight: 500; }
+  .type-picker-btn .td { font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="/dashboard.html" class="topbar-logo">In<span>Lead</span></a>
+  <button class="topbar-back" onclick="window.location.href='/dashboard.html'">← Dashboard</button>
+  <input class="quiz-title-input" id="quiz-title-input" placeholder="Nome do quiz..." maxlength="80">
+  <div class="topbar-right">
+    <span class="save-indicator" id="save-indicator"></span>
+    <button class="btn-sm" onclick="previewQuiz()">👁 Preview</button>
+    <button class="btn-sm" id="status-btn" onclick="togglePublish()">Publicar</button>
+    <button class="btn-sm primary" onclick="saveAll()">Salvar</button>
+  </div>
+</div>
+
+<!-- BUILDER LAYOUT -->
+<div class="builder-layout">
+
+  <!-- LEFT: STEPS -->
+  <div class="steps-panel">
+    <div class="steps-header">
+      <h3>Perguntas</h3>
+      <button class="add-step-btn" onclick="openAddModal()" title="Adicionar pergunta">+</button>
+    </div>
+    <div class="steps-list" id="steps-list">
+      <!-- renderizado por JS -->
+    </div>
+  </div>
+
+  <!-- CENTER: PREVIEW -->
+  <div class="preview-area">
+    <div class="device-toggle">
+      <button class="device-btn active" id="dv-desktop" onclick="setDevice('desktop')">💻 Desktop</button>
+      <button class="device-btn" id="dv-mobile" onclick="setDevice('mobile')">📱 Mobile</button>
+    </div>
+    <div class="device-frame" id="device-frame">
+      <div class="device-preview" id="device-preview">
+        <!-- renderizado por JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: EDIT PANEL -->
+  <div class="edit-panel" id="edit-panel">
+    <div class="empty-panel">
+      <p>Selecione uma pergunta na lista<br>para editar suas propriedades.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD QUESTION TYPE MODAL -->
+<div class="modal-overlay" id="add-modal" onclick="closeAddOutside(event)">
+  <div class="modal">
+    <h3>Tipo de pergunta</h3>
+    <p class="modal-sub">Escolha como o respondente vai interagir:</p>
+    <div class="type-picker-grid">
+      <button class="type-picker-btn" onclick="addQuestion('multiple_choice')">
+        <span class="ti">🔘</span><span class="tl">Múltipla escolha</span><span class="td">Uma resposta</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('checkbox')">
+        <span class="ti">☑️</span><span class="tl">Caixas de seleção</span><span class="td">Várias respostas</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('text')">
+        <span class="ti">✏️</span><span class="tl">Texto livre</span><span class="td">Campo aberto</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('email')">
+        <span class="ti">📧</span><span class="tl">E-mail</span><span class="td">Captação</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('phone')">
+        <span class="ti">📱</span><span class="tl">Telefone</span><span class="td">WhatsApp</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('name')">
+        <span class="ti">👤</span><span class="tl">Nome</span><span class="td">Captação</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('rating')">
+        <span class="ti">⭐</span><span class="tl">Avaliação</span><span class="td">Estrelas 1–5</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('nps')">
+        <span class="ti">📊</span><span class="tl">NPS</span><span class="td">Escala 0–10</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('statement')">
+        <span class="ti">💬</span><span class="tl">Apresentação</span><span class="td">Sem resposta</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── State ──────────────────────────────────────────────────
+  let supabase   = null;
+  let currentUser= null;
+  let quizId     = null;
+  let quiz       = null;
+  let questions  = [];        // [{id, position, type, title, description, required, options:[{id,label,value}]}]
+  let activeIdx  = -1;
+  let saveTimer  = null;
+  let isMobile   = false;
+
+  const TYPE_LABELS = {
+    multiple_choice: 'Múltipla escolha',
+    checkbox: 'Caixas de seleção',
+    text: 'Texto livre',
+    email: 'E-mail',
+    phone: 'Telefone',
+    name: 'Nome',
+    rating: 'Avaliação',
+    nps: 'NPS',
+    statement: 'Apresentação',
+  };
+
+  // ── Init ───────────────────────────────────────────────────
+  async function initSupabase() {
+    if (supabase) return supabase;
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    supabase = createClient(window.__env?.SUPABASE_URL || '', window.__env?.SUPABASE_ANON_KEY || '');
+    return supabase;
+  }
+
+  (async () => {
+    const sb = await initSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = '/'; return; }
+    currentUser = session.user;
+    quizId = new URLSearchParams(location.search).get('id');
+    if (!quizId) { window.location.href = '/dashboard.html'; return; }
+    await loadQuiz();
+  })();
+
+  async function loadQuiz() {
+    const sb = await initSupabase();
+    const { data: q, error: qe } = await sb.from('quizzes').select('*').eq('id', quizId).eq('user_id', currentUser.id).single();
+    if (qe || !q) { window.location.href = '/dashboard.html'; return; }
+    quiz = q;
+    document.getElementById('quiz-title-input').value = q.title;
+    updateStatusBtn();
+
+    const { data: qs } = await sb.from('questions').select('*, options(*)').eq('quiz_id', quizId).order('position');
+    questions = (qs || []).map(q => ({ ...q, options: (q.options || []).sort((a,b) => a.position - b.position) }));
+    renderSteps();
+    if (questions.length > 0) selectStep(0);
+    else renderEmptyPreview();
+  }
+
+  // ── Render Steps ───────────────────────────────────────────
+  function renderSteps() {
+    const list = document.getElementById('steps-list');
+    if (!questions.length) {
+      list.innerHTML = `<div style="padding:24px 12px;text-align:center;color:var(--muted);font-size:13px">Nenhuma pergunta.<br>Clique em + para adicionar.</div>`;
+      return;
+    }
+    list.innerHTML = questions.map((q, i) => `
+      <div class="step-item ${i === activeIdx ? 'active' : ''}" onclick="selectStep(${i})">
+        <div class="step-num">${i+1}</div>
+        <div class="step-text">${escHtml(q.title || 'Sem título')}</div>
+        <span class="step-type-badge">${TYPE_LABELS[q.type]?.split(' ')[0] || q.type}</span>
+        <button class="step-del" onclick="deleteStep(event,${i})" title="Remover">×</button>
+      </div>`).join('');
+  }
+
+  // ── Select / Edit Step ─────────────────────────────────────
+  function selectStep(i) {
+    activeIdx = i;
+    renderSteps();
+    renderPreview();
+    renderEditPanel();
+  }
+
+  // ── Preview ────────────────────────────────────────────────
+  function renderPreview() {
+    const q = questions[activeIdx];
+    if (!q) { renderEmptyPreview(); return; }
+    const preview = document.getElementById('device-preview');
+    let content = '';
+    if (q.type === 'multiple_choice' || q.type === 'checkbox') {
+      const opts = q.options?.length
+        ? q.options.map((o,i) => `<div class="preview-option">${o.emoji ? o.emoji + ' ' : ''}${escHtml(o.label)}</div>`).join('')
+        : '<div class="preview-option">Opção 1</div><div class="preview-option">Opção 2</div>';
+      content = `<div class="preview-options">${opts}</div>`;
+    } else if (['text','email','phone','name'].includes(q.type)) {
+      const ph = { text: 'Digite sua resposta...', email: 'seu@email.com', phone: '(11) 9 9999-9999', name: 'Seu nome...' };
+      content = `<input class="preview-input-mock" placeholder="${ph[q.type]}" readonly>`;
+    } else if (q.type === 'rating') {
+      content = `<div style="display:flex;gap:8px;font-size:28px">⭐⭐⭐⭐⭐</div>`;
+    } else if (q.type === 'nps') {
+      content = `<div style="display:flex;gap:6px;flex-wrap:wrap">${Array.from({length:11},(_,i)=>`<div style="width:36px;height:36px;border-radius:8px;background:var(--paper);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">${i}</div>`).join('')}</div>`;
+    } else if (q.type === 'statement') {
+      content = `<button class="preview-btn-mock">Continuar →</button>`;
+    }
+    preview.innerHTML = `
+      <div class="preview-question-type">${TYPE_LABELS[q.type] || q.type}</div>
+      <div class="preview-title">${escHtml(q.title || 'Título da pergunta')}</div>
+      ${q.description ? `<div class="preview-desc">${escHtml(q.description)}</div>` : ''}
+      ${content}
+      ${q.type !== 'statement' ? '<button class="preview-btn-mock">Próximo →</button>' : ''}
+    `;
+  }
+
+  function renderEmptyPreview() {
+    document.getElementById('device-preview').innerHTML = `
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);text-align:center;gap:12px">
+        <div style="font-size:40px">📋</div>
+        <div style="font-size:14px">Adicione perguntas na lista<br>para visualizar aqui.</div>
+      </div>`;
+  }
+
+  // ── Edit Panel ─────────────────────────────────────────────
+  function renderEditPanel() {
+    const q = questions[activeIdx];
+    if (!q) { document.getElementById('edit-panel').innerHTML = `<div class="empty-panel"><p>Selecione uma pergunta.</p></div>`; return; }
+    const hasOptions = q.type === 'multiple_choice' || q.type === 'checkbox';
+    const optionsHtml = hasOptions ? `
+      <div class="panel-section">
+        <div class="panel-label">Opções</div>
+        <div class="options-list" id="options-list">
+          ${(q.options||[]).map((o,i) => `
+            <div class="option-row" data-i="${i}">
+              <span style="font-size:16px;cursor:pointer" onclick="toggleEmoji(${i})">${o.emoji || '➕'}</span>
+              <input value="${escHtml(o.label)}" placeholder="Opção ${i+1}" oninput="updateOption(${i},'label',this.value)">
+              <button class="option-del" onclick="deleteOption(${i})">×</button>
+            </div>`).join('')}
+        </div>
+        <button class="add-option-btn" onclick="addOption()">+ Adicionar opção</button>
+      </div>` : '';
+
+    document.getElementById('edit-panel').innerHTML = `
+      <!-- TIPO -->
+      <div class="panel-section">
+        <div class="panel-label">Tipo</div>
+        <div class="type-grid">
+          ${Object.entries(TYPE_LABELS).map(([k,v]) => `
+            <button class="type-btn ${q.type===k?'active':''}" onclick="changeType('${k}')">
+              <span class="type-icon">${typeIcon(k)}</span>
+              <span style="font-size:11px">${v.split(' ')[0]}</span>
+            </button>`).join('')}
+        </div>
+      </div>
+      <!-- CONTEÚDO -->
+      <div class="panel-section">
+        <div class="panel-label">Conteúdo</div>
+        <div class="field">
+          <label>Pergunta</label>
+          <input type="text" value="${escHtml(q.title||'')}" oninput="updateField('title',this.value)" placeholder="Qual sua dúvida?">
+        </div>
+        <div class="field">
+          <label>Descrição (opcional)</label>
+          <textarea rows="2" oninput="updateField('description',this.value)" placeholder="Contexto adicional...">${escHtml(q.description||'')}</textarea>
+        </div>
+      </div>
+      <!-- OPÇÕES -->
+      ${optionsHtml}
+      <!-- CONFIG -->
+      <div class="panel-section">
+        <div class="panel-label">Configurações</div>
+        <div class="toggle-row">
+          <label style="font-size:13px">Resposta obrigatória</label>
+          <button class="toggle ${q.required?'on':''}" onclick="toggleRequired()"></button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Field updates ──────────────────────────────────────────
+  function updateField(key, value) {
+    questions[activeIdx][key] = value;
+    renderPreview();
+    debounceSave();
+  }
+
+  function changeType(type) {
+    questions[activeIdx].type = type;
+    if ((type === 'multiple_choice' || type === 'checkbox') && !questions[activeIdx].options?.length) {
+      questions[activeIdx].options = [
+        { id: tmpId(), label: 'Opção 1', value: 'opcao-1', emoji: '', position: 0 },
+        { id: tmpId(), label: 'Opção 2', value: 'opcao-2', emoji: '', position: 1 },
+      ];
+    }
+    renderEditPanel(); renderPreview(); debounceSave();
+  }
+
+  function toggleRequired() {
+    questions[activeIdx].required = !questions[activeIdx].required;
+    renderEditPanel(); debounceSave();
+  }
+
+  // ── Options ────────────────────────────────────────────────
+  function addOption() {
+    const i = (questions[activeIdx].options||[]).length;
+    if (!questions[activeIdx].options) questions[activeIdx].options = [];
+    questions[activeIdx].options.push({ id: tmpId(), label: `Opção ${i+1}`, value: `opcao-${i+1}`, emoji: '', position: i });
+    renderEditPanel(); renderPreview(); debounceSave();
+  }
+
+  function deleteOption(i) {
+    questions[activeIdx].options.splice(i, 1);
+    questions[activeIdx].options.forEach((o,j) => o.position = j);
+    renderEditPanel(); renderPreview(); debounceSave();
+  }
+
+  function updateOption(i, key, value) {
+    questions[activeIdx].options[i][key] = value;
+    if (key === 'label') questions[activeIdx].options[i].value = value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    renderPreview(); debounceSave();
+  }
+
+  function toggleEmoji(i) {
+    const emojis = ['😊','🔥','⭐','✅','❌','🎯','💡','🚀','❤️','😮','😢','👍','👎',''];
+    const cur = questions[activeIdx].options[i].emoji || '';
+    const next = emojis[(emojis.indexOf(cur) + 1) % emojis.length];
+    questions[activeIdx].options[i].emoji = next;
+    renderEditPanel(); renderPreview(); debounceSave();
+  }
+
+  // ── Add / Delete step ──────────────────────────────────────
+  function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
+  function closeAddOutside(e) { if (e.target.id === 'add-modal') document.getElementById('add-modal').classList.remove('open'); }
+
+  function addQuestion(type) {
+    document.getElementById('add-modal').classList.remove('open');
+    const q = {
+      id: tmpId(), quiz_id: quizId, position: questions.length,
+      type, title: '', description: '', required: true,
+      options: (type === 'multiple_choice' || type === 'checkbox')
+        ? [{ id: tmpId(), label: 'Opção 1', value: 'opcao-1', emoji: '', position: 0 }]
+        : [],
+      _new: true,
+    };
+    questions.push(q);
+    selectStep(questions.length - 1);
+    debounceSave();
+  }
+
+  function deleteStep(event, i) {
+    event.stopPropagation();
+    if (!confirm('Remover esta pergunta?')) return;
+    questions.splice(i, 1);
+    questions.forEach((q,j) => q.position = j);
+    if (activeIdx >= questions.length) activeIdx = questions.length - 1;
+    renderSteps();
+    if (activeIdx >= 0) selectStep(activeIdx);
+    else renderEmptyPreview();
+    debounceSave();
+  }
+
+  // ── Save ───────────────────────────────────────────────────
+  function debounceSave() {
+    document.getElementById('save-indicator').textContent = '● não salvo';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveAll, 2000);
+  }
+
+  async function saveAll() {
+    clearTimeout(saveTimer);
+    document.getElementById('save-indicator').textContent = 'Salvando...';
+    const sb = await initSupabase();
+    const newTitle = document.getElementById('quiz-title-input').value.trim() || quiz.title;
+
+    // Save quiz title
+    await sb.from('quizzes').update({ title: newTitle }).eq('id', quizId);
+
+    // Upsert questions + options
+    for (const q of questions) {
+      const isNew = q._new || !q.id.includes('-');
+      const payload = { quiz_id: quizId, position: q.position, type: q.type, title: q.title, description: q.description, required: q.required, settings: {} };
+      let qId = q.id;
+      if (isNew) {
+        const { data } = await sb.from('questions').insert(payload).select().single();
+        if (data) { q.id = data.id; q._new = false; qId = data.id; }
+      } else {
+        await sb.from('questions').update(payload).eq('id', qId);
+      }
+      // Sync options: delete all then re-insert
+      if (q.options?.length >= 0) {
+        await sb.from('options').delete().eq('question_id', qId);
+        if (q.options.length) {
+          await sb.from('options').insert(q.options.map((o,i) => ({ question_id: qId, position: i, label: o.label, value: o.value, emoji: o.emoji || null })));
+        }
+      }
+    }
+
+    // Delete questions removed from UI
+    const currentIds = questions.map(q => q.id).filter(id => !id.startsWith('tmp-'));
+    if (currentIds.length >= 0) {
+      const { data: dbQs } = await sb.from('questions').select('id').eq('quiz_id', quizId);
+      const toDelete = (dbQs||[]).filter(q => !currentIds.includes(q.id)).map(q => q.id);
+      if (toDelete.length) await sb.from('questions').delete().in('id', toDelete);
+    }
+
+    document.getElementById('save-indicator').textContent = '✓ salvo';
+    setTimeout(() => document.getElementById('save-indicator').textContent = '', 2000);
+  }
+
+  // ── Publish ────────────────────────────────────────────────
+  function updateStatusBtn() {
+    const btn = document.getElementById('status-btn');
+    if (quiz.status === 'published') {
+      btn.textContent = '⏸ Pausar';
+    } else {
+      btn.textContent = '🚀 Publicar';
+    }
+  }
+
+  async function togglePublish() {
+    const sb = await initSupabase();
+    const newStatus = quiz.status === 'published' ? 'draft' : 'published';
+    await sb.from('quizzes').update({ status: newStatus }).eq('id', quizId);
+    quiz.status = newStatus;
+    updateStatusBtn();
+    const msg = newStatus === 'published'
+      ? `Quiz publicado!\nLink: ${location.origin}/q/${quiz.slug}`
+      : 'Quiz pausado. Só você pode ver.';
+    alert(msg);
+  }
+
+  // ── Preview link ───────────────────────────────────────────
+  function previewQuiz() { window.open(`/q/${quiz?.slug}`, '_blank'); }
+
+  // ── Device toggle ──────────────────────────────────────────
+  function setDevice(d) {
+    isMobile = d === 'mobile';
+    document.getElementById('device-frame').classList.toggle('mobile', isMobile);
+    document.getElementById('dv-desktop').classList.toggle('active', !isMobile);
+    document.getElementById('dv-mobile').classList.toggle('active', isMobile);
+  }
+
+  // ── Helpers ────────────────────────────────────────────────
+  function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function tmpId()   { return 'tmp-' + Math.random().toString(36).slice(2); }
+  function typeIcon(t) {
+    return { multiple_choice:'🔘', checkbox:'☑️', text:'✏️', email:'📧', phone:'📱', name:'👤', rating:'⭐', nps:'📊', statement:'💬' }[t] || '❓';
+  }
+
+  // Title input saves
+  document.getElementById('quiz-title-input')?.addEventListener('input', debounceSave);
+</script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InLead — Dashboard</title>
+<script src="/api/env"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:    #0d0d12;
+    --paper:  #f7f5f0;
+    --accent: #5a3af7;
+    --glow:   #7c5cfc;
+    --soft:   #e8e4ff;
+    --muted:  #9190a4;
+    --border: #e2e0ee;
+    --danger: #e5484d;
+    --success:#22c55e;
+    --warn:   #f59e0b;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(90,58,247,.1);
+    --sidebar-w: 240px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; display: flex; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w); background: #fff;
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
+  }
+  .sidebar-logo {
+    padding: 24px 20px;
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 20px; color: var(--accent); letter-spacing: -.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo span { color: var(--ink); }
+  .sidebar-nav { flex: 1; padding: 16px 12px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    font-size: 14px; font-weight: 400; color: var(--muted);
+    cursor: pointer; transition: all .15s; text-decoration: none;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--paper); color: var(--ink); }
+  .nav-item.active { background: var(--soft); color: var(--accent); font-weight: 500; }
+  .nav-icon { font-size: 17px; width: 22px; text-align: center; }
+  .sidebar-footer {
+    padding: 16px 12px;
+    border-top: 1px solid var(--border);
+  }
+  .user-block {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    cursor: pointer;
+  }
+  .user-block:hover { background: var(--paper); }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; font-family: 'Syne', sans-serif;
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-email { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .logout-btn {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 16px; padding: 4px;
+    border-radius: 6px; transition: color .15s;
+  }
+  .logout-btn:hover { color: var(--danger); }
+
+  /* ── MAIN ── */
+  .main { margin-left: var(--sidebar-w); flex: 1; padding: 40px 48px; }
+
+  /* ── HEADER ── */
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+  .page-header h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -.5px; }
+  .btn-primary {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #fff;
+    padding: 11px 22px; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    border: none; cursor: pointer; transition: all .2s;
+    box-shadow: 0 4px 16px rgba(90,58,247,.3);
+  }
+  .btn-primary:hover { background: var(--glow); transform: translateY(-1px); }
+
+  /* ── STATS ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+  .stat-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+  .stat-value.accent { color: var(--accent); }
+
+  /* ── QUIZ GRID ── */
+  .quiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+  .quiz-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    display: flex; flex-direction: column; gap: 16px;
+    transition: all .2s; cursor: pointer;
+    position: relative;
+  }
+  .quiz-card:hover { border-color: rgba(90,58,247,.3); box-shadow: var(--shadow); transform: translateY(-2px); }
+  .quiz-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .quiz-card-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: -.3px; flex: 1; }
+  .status-badge {
+    font-size: 11px; font-weight: 600; padding: 4px 10px;
+    border-radius: 50px; flex-shrink: 0; letter-spacing: .5px; text-transform: uppercase;
+  }
+  .status-draft     { background: #fef3c7; color: #92400e; }
+  .status-published { background: #d1fae5; color: #065f46; }
+  .status-archived  { background: #f3f4f6; color: #6b7280; }
+  .quiz-stats { display: flex; gap: 20px; }
+  .quiz-stat { font-size: 13px; color: var(--muted); }
+  .quiz-stat strong { color: var(--ink); font-weight: 600; font-size: 15px; display: block; }
+  .quiz-actions { display: flex; gap: 8px; }
+  .action-btn {
+    flex: 1; padding: 9px; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    border: 1.5px solid var(--border); background: transparent; color: var(--ink);
+    cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .action-btn:hover { background: var(--paper); border-color: var(--accent); color: var(--accent); }
+  .action-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center; padding: 80px 24px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .empty-state p  { font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+
+  /* ── MODAL DELETE ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(13,13,18,.6); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 20px;
+    padding: 32px; width: 100%; max-width: 380px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.2);
+    animation: slideUp .25s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .modal h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+  .modal p  { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-cancel {
+    flex: 1; padding: 12px; border-radius: 10px;
+    border: 1.5px solid var(--border); background: transparent; color: var(--ink);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s;
+  }
+  .btn-cancel:hover { background: var(--paper); }
+  .btn-danger {
+    flex: 1; padding: 12px; border-radius: 10px;
+    border: none; background: var(--danger); color: #fff;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s;
+  }
+  .btn-danger:hover { opacity: .88; }
+
+  /* ── CREATE MODAL ── */
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #444; }
+  .form-group input {
+    width: 100%; padding: 12px 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    outline: none; transition: border-color .2s; background: #fafafa; color: var(--ink);
+  }
+  .form-group input:focus { border-color: var(--accent); background: #fff; }
+  .modal-btn {
+    width: 100%; padding: 14px; border-radius: 10px;
+    background: var(--accent); color: #fff; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    cursor: pointer; transition: background .2s;
+  }
+  .modal-btn:hover { background: var(--glow); }
+  .modal-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* ── LOADER ── */
+  .spinner {
+    display: inline-block; width: 20px; height: 20px;
+    border: 2px solid var(--border); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin .6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-state { display: flex; align-items: center; justify-content: center; padding: 80px; gap: 12px; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 24px 20px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">In<span>Lead</span></div>
+  <nav class="sidebar-nav">
+    <a href="/dashboard.html" class="nav-item active">
+      <span class="nav-icon">📋</span> Meus quizzes
+    </a>
+    <a href="#" class="nav-item" id="nav-docs" onclick="alert('Em breve!')">
+      <span class="nav-icon">📖</span> Documentação
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-block">
+      <div class="avatar" id="user-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Carregando...</div>
+        <div class="user-email" id="user-email"></div>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()" title="Sair">↩</button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="page-header">
+    <h1>Meus quizzes</h1>
+    <button class="btn-primary" onclick="openCreateModal()">
+      <span>+</span> Novo quiz
+    </button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total de quizzes</div>
+      <div class="stat-value accent" id="stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Publicados</div>
+      <div class="stat-value" id="stat-published">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total de respostas</div>
+      <div class="stat-value" id="stat-responses">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Taxa de conclusão</div>
+      <div class="stat-value" id="stat-completion">—</div>
+    </div>
+  </div>
+
+  <!-- QUIZ GRID -->
+  <div class="quiz-grid" id="quiz-grid">
+    <div class="loading-state"><div class="spinner"></div> Carregando quizzes...</div>
+  </div>
+</main>
+
+<!-- MODAL CRIAR QUIZ -->
+<div class="modal-overlay" id="create-modal" onclick="closeCreateOutside(event)">
+  <div class="modal">
+    <h3>Novo quiz</h3>
+    <p>Dê um nome ao seu quiz para começar.</p>
+    <div class="form-group">
+      <label>Nome do quiz</label>
+      <input type="text" id="new-quiz-title" placeholder="Ex: Quiz de diagnóstico" maxlength="80">
+    </div>
+    <button class="modal-btn" id="create-btn" onclick="createQuiz()">Criar quiz</button>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR DELETE -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <h3>Excluir quiz?</h3>
+    <p>Esta ação não pode ser desfeita. Todos os dados e respostas serão perdidos.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDeleteModal()">Cancelar</button>
+      <button class="btn-danger" id="confirm-delete-btn" onclick="confirmDelete()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let supabase = null;
+  let currentUser = null;
+  let deleteTargetId = null;
+
+  async function initSupabase() {
+    if (supabase) return supabase;
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    const url  = window.__env?.SUPABASE_URL || '';
+    const anon = window.__env?.SUPABASE_ANON_KEY || '';
+    supabase = createClient(url, anon);
+    return supabase;
+  }
+
+  // ── Auth guard ─────────────────────────────────────────────
+  (async () => {
+    const sb = await initSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = '/'; return; }
+    currentUser = session.user;
+    const name = currentUser.user_metadata?.display_name || currentUser.email.split('@')[0];
+    document.getElementById('user-name').textContent  = name;
+    document.getElementById('user-email').textContent = currentUser.email;
+    document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+    loadQuizzes();
+  })();
+
+  async function handleLogout() {
+    const sb = await initSupabase();
+    await sb.auth.signOut();
+    window.location.href = '/';
+  }
+
+  // ── Load quizzes ───────────────────────────────────────────
+  async function loadQuizzes() {
+    const sb = await initSupabase();
+    const { data, error } = await sb
+      .from('quiz_stats')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if (error) { renderError(); return; }
+    renderStats(data);
+    renderGrid(data);
+  }
+
+  function renderStats(quizzes) {
+    const total     = quizzes.length;
+    const published = quizzes.filter(q => q.status === 'published').length;
+    const responses = quizzes.reduce((s, q) => s + Number(q.total_responses || 0), 0);
+    const completed = quizzes.reduce((s, q) => s + Number(q.completed_responses || 0), 0);
+    const rate      = responses > 0 ? Math.round(100 * completed / responses) : 0;
+    document.getElementById('stat-total').textContent      = total;
+    document.getElementById('stat-published').textContent  = published;
+    document.getElementById('stat-responses').textContent  = responses;
+    document.getElementById('stat-completion').textContent = rate + '%';
+  }
+
+  function renderGrid(quizzes) {
+    const grid = document.getElementById('quiz-grid');
+    if (!quizzes.length) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <h3>Nenhum quiz ainda</h3>
+          <p>Clique em "Novo quiz" para criar seu primeiro funil de captação.</p>
+        </div>`;
+      return;
+    }
+    grid.innerHTML = quizzes.map(q => `
+      <div class="quiz-card">
+        <div class="quiz-card-header">
+          <div class="quiz-card-title">${escHtml(q.title)}</div>
+          <span class="status-badge status-${q.status}">${statusLabel(q.status)}</span>
+        </div>
+        <div class="quiz-stats">
+          <div class="quiz-stat"><strong>${q.total_responses || 0}</strong>respostas</div>
+          <div class="quiz-stat"><strong>${q.completion_rate || 0}%</strong>conclusão</div>
+        </div>
+        <div class="quiz-actions">
+          <button class="action-btn" onclick="openBuilder('${q.id}')">✏️ Editar</button>
+          <button class="action-btn" onclick="openResults('${q.id}')">📊 Leads</button>
+          <button class="action-btn" onclick="copyLink('${q.slug}')">🔗 Link</button>
+          <button class="action-btn danger" onclick="openDeleteModal('${q.id}')">🗑️</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderError() {
+    document.getElementById('quiz-grid').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Erro ao carregar</h3>
+        <p>Verifique sua conexão e recarregue a página.</p>
+      </div>`;
+  }
+
+  // ── Create quiz ────────────────────────────────────────────
+  function openCreateModal() {
+    document.getElementById('new-quiz-title').value = '';
+    document.getElementById('create-modal').classList.add('open');
+    setTimeout(() => document.getElementById('new-quiz-title').focus(), 100);
+  }
+  function closeCreateOutside(e) { if (e.target.id === 'create-modal') document.getElementById('create-modal').classList.remove('open'); }
+
+  async function createQuiz() {
+    const title = document.getElementById('new-quiz-title').value.trim();
+    if (!title) { document.getElementById('new-quiz-title').focus(); return; }
+    const btn = document.getElementById('create-btn');
+    btn.disabled = true; btn.textContent = 'Criando...';
+    const slug = title.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      + '-' + Date.now().toString(36);
+    const sb = await initSupabase();
+    const { data, error } = await sb.from('quizzes').insert({
+      user_id: currentUser.id, title, slug, status: 'draft'
+    }).select().single();
+    btn.disabled = false; btn.textContent = 'Criar quiz';
+    if (error) { alert('Erro ao criar quiz: ' + error.message); return; }
+    document.getElementById('create-modal').classList.remove('open');
+    window.location.href = `/builder.html?id=${data.id}`;
+  }
+
+  // ── Delete quiz ────────────────────────────────────────────
+  function openDeleteModal(id) { deleteTargetId = id; document.getElementById('delete-modal').classList.add('open'); }
+  function closeDeleteModal()  { deleteTargetId = null; document.getElementById('delete-modal').classList.remove('open'); }
+
+  async function confirmDelete() {
+    if (!deleteTargetId) return;
+    const btn = document.getElementById('confirm-delete-btn');
+    btn.disabled = true; btn.textContent = 'Excluindo...';
+    const sb = await initSupabase();
+    const { error } = await sb.from('quizzes').delete().eq('id', deleteTargetId).eq('user_id', currentUser.id);
+    btn.disabled = false; btn.textContent = 'Excluir';
+    if (error) { alert('Erro: ' + error.message); return; }
+    closeDeleteModal();
+    loadQuizzes();
+  }
+
+  // ── Navigation ─────────────────────────────────────────────
+  function openBuilder(id)  { window.location.href = `/builder.html?id=${id}`; }
+  function openResults(id)  { window.location.href = `/results.html?id=${id}`; }
+  function copyLink(slug) {
+    const url = `${window.location.origin}/q/${slug}`;
+    navigator.clipboard.writeText(url).then(() => alert('Link copiado!\n' + url));
+  }
+
+  // ── Helpers ────────────────────────────────────────────────
+  function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function statusLabel(s) { return { draft: 'Rascunho', published: 'Publicado', archived: 'Arquivado' }[s] || s; }
+
+  // Enter no campo de criação
+  document.getElementById('new-quiz-title')?.addEventListener('keydown', e => { if (e.key === 'Enter') createQuiz(); });
+</script>
+</body>
+</html>

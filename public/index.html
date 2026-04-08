@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InLead — Crie quizzes que convertem</title>
+<script src="/api/env"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:    #0d0d12;
+    --paper:  #f7f5f0;
+    --accent: #5a3af7;
+    --glow:   #7c5cfc;
+    --soft:   #e8e4ff;
+    --muted:  #9190a4;
+    --border: #e2e0ee;
+    --danger: #e5484d;
+    --success:#22c55e;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(90,58,247,.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(247,245,240,.85);
+    backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 22px; color: var(--accent);
+    text-decoration: none; letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--ink); }
+  nav .cta-btn {
+    background: var(--accent); color: #fff;
+    border: none; padding: 10px 22px; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all .2s;
+  }
+  nav .cta-btn:hover { background: var(--glow); transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 80px 24px 60px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+    width: 700px; height: 700px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(90,58,247,.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--soft); color: var(--accent);
+    border: 1px solid rgba(90,58,247,.2);
+    padding: 6px 16px; border-radius: 50px;
+    font-size: 13px; font-weight: 500; margin-bottom: 28px;
+  }
+  .badge-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .5; transform: scale(1.4); }
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(42px, 7vw, 80px);
+    font-weight: 800; line-height: 1.05;
+    letter-spacing: -2px; margin-bottom: 24px;
+    max-width: 800px;
+  }
+  h1 em {
+    font-style: normal; color: var(--accent);
+    background: linear-gradient(135deg, var(--accent), #a78bfa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: 18px; color: var(--muted);
+    max-width: 500px; line-height: 1.6; margin-bottom: 40px;
+    font-weight: 300;
+  }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn-primary {
+    background: var(--accent); color: #fff;
+    padding: 16px 36px; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500;
+    border: none; cursor: pointer; transition: all .25s;
+    box-shadow: 0 8px 32px rgba(90,58,247,.35);
+  }
+  .btn-primary:hover { background: var(--glow); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(90,58,247,.45); }
+  .btn-ghost {
+    background: transparent; color: var(--ink);
+    padding: 16px 36px; border-radius: 50px;
+    font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500;
+    border: 1.5px solid var(--border); cursor: pointer; transition: all .25s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── FEATURES ── */
+  .features {
+    padding: 80px 24px;
+    max-width: 1100px; margin: 0 auto; width: 100%;
+  }
+  .section-label {
+    text-align: center; font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 3px;
+    color: var(--accent); margin-bottom: 16px;
+  }
+  .section-title {
+    text-align: center;
+    font-family: 'Syne', sans-serif; font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700; letter-spacing: -1px; margin-bottom: 56px;
+  }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .feature-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px;
+    transition: all .25s;
+  }
+  .feature-card:hover {
+    border-color: rgba(90,58,247,.3);
+    box-shadow: var(--shadow);
+    transform: translateY(-3px);
+  }
+  .feature-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--soft); display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 20px;
+  }
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
+    margin-bottom: 10px; letter-spacing: -.3px;
+  }
+  .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── AUTH MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(13,13,18,.6); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff; border-radius: 20px;
+    padding: 40px; width: 100%; max-width: 420px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.2);
+    animation: slideUp .3s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .modal-logo {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 20px; color: var(--accent); margin-bottom: 8px;
+  }
+  .modal h2 {
+    font-family: 'Syne', sans-serif; font-size: 26px;
+    font-weight: 700; letter-spacing: -.5px; margin-bottom: 6px;
+  }
+  .modal-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block; font-size: 13px; font-weight: 500;
+    margin-bottom: 6px; color: #444;
+  }
+  .form-group input {
+    width: 100%; padding: 13px 16px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    transition: border-color .2s; outline: none; color: var(--ink);
+    background: #fafafa;
+  }
+  .form-group input:focus { border-color: var(--accent); background: #fff; }
+  .form-group input.error { border-color: var(--danger); }
+  .field-error { font-size: 12px; color: var(--danger); margin-top: 4px; display: none; }
+  .field-error.show { display: block; }
+  .modal-btn {
+    width: 100%; padding: 15px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    cursor: pointer; margin-top: 8px; transition: all .2s;
+  }
+  .modal-btn:hover { background: var(--glow); }
+  .modal-btn:disabled { opacity: .6; cursor: not-allowed; }
+  .modal-divider {
+    text-align: center; font-size: 13px; color: var(--muted);
+    margin: 20px 0; position: relative;
+  }
+  .modal-divider::before, .modal-divider::after {
+    content: ''; position: absolute; top: 50%; width: 40%;
+    height: 1px; background: var(--border);
+  }
+  .modal-divider::before { left: 0; }
+  .modal-divider::after  { right: 0; }
+  .modal-switch {
+    text-align: center; font-size: 14px; color: var(--muted); margin-top: 20px;
+  }
+  .modal-switch a { color: var(--accent); cursor: pointer; text-decoration: none; font-weight: 500; }
+  .modal-switch a:hover { text-decoration: underline; }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    background: none; border: none; font-size: 20px;
+    color: var(--muted); cursor: pointer; width: 32px; height: 32px;
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: var(--paper); }
+  .modal-wrapper { position: relative; }
+  .alert {
+    padding: 12px 16px; border-radius: 10px; font-size: 14px;
+    margin-bottom: 16px; display: none;
+  }
+  .alert.show { display: block; }
+  .alert.error   { background: #fff1f1; color: var(--danger); border: 1px solid #fecdd3; }
+  .alert.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 32px 24px;
+    font-size: 13px; color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="logo">In<span>Lead</span></a>
+  <button class="cta-btn" onclick="openModal('login')">Entrar</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge"><span class="badge-dot"></span> Plataforma de quizzes inteligentes</div>
+  <h1>Crie quizzes que<br><em>capturam leads</em></h1>
+  <p class="hero-sub">Monte seu funil em minutos. Sem código. Seus leads organizados em um só lugar.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="openModal('signup')">Começar grátis</button>
+    <button class="btn-ghost" onclick="openModal('login')">Já tenho conta</button>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <p class="section-label">Por que InLead</p>
+  <h2 class="section-title">Tudo que você precisa<br>em um lugar só</h2>
+  <div class="grid-3">
+    <div class="feature-card">
+      <div class="feature-icon">✏️</div>
+      <h3>Builder visual</h3>
+      <p>Crie perguntas, escolha tipos, arraste para reordenar. Sem precisar saber programar.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎨</div>
+      <h3>Personalização total</h3>
+      <p>Cores, fontes, logo. Cada quiz com a identidade do seu negócio.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Leads em tempo real</h3>
+      <p>Veja quem respondeu, quais opções escolheu e exporte tudo em CSV.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔗</div>
+      <h3>Link compartilhável</h3>
+      <p>Cada quiz tem seu próprio link. Compartilhe no Instagram, WhatsApp, onde quiser.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <h3>Perfeito no celular</h3>
+      <p>Seus respondentes abrem no celular? Tudo funciona perfeitamente em qualquer tela.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Seus dados protegidos</h3>
+      <p>Cada conta vê apenas seus próprios quizzes e leads. Segurança por padrão.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 InLead · <a href="#">Termos</a> · <a href="#">Privacidade</a></p>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal-wrapper">
+    <div class="modal" id="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-logo">InLead</div>
+      <h2 id="modal-title">Entrar</h2>
+      <p class="modal-sub" id="modal-sub">Acesse sua conta para continuar</p>
+
+      <div class="alert" id="modal-alert"></div>
+
+      <form id="auth-form" onsubmit="handleAuth(event)">
+        <!-- campo só no cadastro -->
+        <div class="form-group" id="field-name" style="display:none">
+          <label>Seu nome</label>
+          <input type="text" id="inp-display-name" placeholder="Como quer ser chamado?">
+          <span class="field-error" id="err-name">Digite seu nome</span>
+        </div>
+        <div class="form-group">
+          <label>E-mail</label>
+          <input type="email" id="inp-email" placeholder="voce@email.com" required>
+          <span class="field-error" id="err-email">E-mail inválido</span>
+        </div>
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" id="inp-password" placeholder="••••••••" required minlength="6">
+          <span class="field-error" id="err-password">Mínimo 6 caracteres</span>
+        </div>
+        <button type="submit" class="modal-btn" id="auth-btn">Entrar</button>
+      </form>
+
+      <div class="modal-divider">ou</div>
+      <div class="modal-switch" id="modal-switch">
+        Não tem conta? <a onclick="switchMode('signup')">Criar conta grátis</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Supabase client (via CDN) ──────────────────────────────
+  const SUPABASE_URL = window.__env?.SUPABASE_URL || '';
+  const SUPABASE_ANON = window.__env?.SUPABASE_ANON_KEY || '';
+
+  let supabase = null;
+  async function initSupabase() {
+    if (supabase) return supabase;
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+    return supabase;
+  }
+
+  // Redireciona se já logado
+  (async () => {
+    try {
+      const sb = await initSupabase();
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) window.location.href = '/dashboard.html';
+    } catch(_) {}
+  })();
+
+  // ── Modal ──────────────────────────────────────────────────
+  let authMode = 'login';
+  function openModal(mode) {
+    authMode = mode || 'login';
+    document.getElementById('modal-overlay').classList.add('open');
+    updateModalUI();
+  }
+  function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+  function closeModalOutside(e) { if (e.target.id === 'modal-overlay') closeModal(); }
+  function switchMode(mode) { authMode = mode; updateModalUI(); }
+  function updateModalUI() {
+    const isSignup = authMode === 'signup';
+    document.getElementById('modal-title').textContent = isSignup ? 'Criar conta' : 'Entrar';
+    document.getElementById('modal-sub').textContent   = isSignup ? 'É grátis e leva 30 segundos' : 'Acesse sua conta para continuar';
+    document.getElementById('auth-btn').textContent    = isSignup ? 'Criar conta' : 'Entrar';
+    document.getElementById('field-name').style.display = isSignup ? '' : 'none';
+    document.getElementById('modal-switch').innerHTML  = isSignup
+      ? 'Já tem conta? <a onclick="switchMode(\'login\')">Entrar</a>'
+      : 'Não tem conta? <a onclick="switchMode(\'signup\')">Criar conta grátis</a>';
+    clearAlert();
+  }
+  function showAlert(msg, type = 'error') {
+    const el = document.getElementById('modal-alert');
+    el.textContent = msg; el.className = `alert ${type} show`;
+  }
+  function clearAlert() {
+    const el = document.getElementById('modal-alert');
+    el.className = 'alert'; el.textContent = '';
+  }
+
+  // ── Auth ───────────────────────────────────────────────────
+  async function handleAuth(e) {
+    e.preventDefault();
+    const email    = document.getElementById('inp-email').value.trim();
+    const password = document.getElementById('inp-password').value;
+    const name     = document.getElementById('inp-display-name').value.trim();
+    const btn      = document.getElementById('auth-btn');
+
+    clearAlert();
+    btn.disabled = true;
+    btn.textContent = authMode === 'signup' ? 'Criando...' : 'Entrando...';
+
+    try {
+      const sb = await initSupabase();
+      if (authMode === 'signup') {
+        if (!name) { showAlert('Digite seu nome.'); btn.disabled = false; btn.textContent = 'Criar conta'; return; }
+        const { error } = await sb.auth.signUp({
+          email, password,
+          options: { data: { display_name: name } }
+        });
+        if (error) throw error;
+        showAlert('Conta criada! Verifique seu e-mail para confirmar.', 'success');
+        btn.textContent = 'Verifique seu e-mail';
+      } else {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        window.location.href = '/dashboard.html';
+      }
+    } catch (err) {
+      const msgs = {
+        'Invalid login credentials': 'E-mail ou senha incorretos.',
+        'Email not confirmed':        'Confirme seu e-mail antes de entrar.',
+        'User already registered':    'Este e-mail já tem uma conta. Faça login.',
+        'Password should be at least 6 characters': 'A senha precisa ter pelo menos 6 caracteres.',
+      };
+      showAlert(msgs[err.message] || 'Algo deu errado. Tente novamente.');
+      btn.disabled = false;
+      btn.textContent = authMode === 'signup' ? 'Criar conta' : 'Entrar';
+    }
+  }
+</script>
+</body>
+</html>
