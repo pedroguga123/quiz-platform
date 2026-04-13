@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funnly — Integrações</title>
+<script>if(localStorage.getItem('funnly-theme')==='dark')document.body.classList.add('dark')</script>
+<script src="/api/env"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  :root {
+    --ink:#0f0a1e; --paper:#f9f7ff; --accent:#a855f7; --glow:#9333ea;
+    --soft:#f3ebff; --muted:#9d8fb0; --border:#e8e0f5; --danger:#e5484d;
+    --success:#22c55e; --cta:#fb923c; --radius:12px; --sidebar-w:240px;
+  }
+  body.dark{
+    --ink:#f0ecff;--paper:#0a0a0f;--surface:#110d1f;--accent:#a855f7;--glow:#c084fc;
+    --soft:#1a1030;--muted:#7c6f9a;--border:#1e1a2e;--danger:#f87171;--success:#4ade80;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;display:flex;transition:background .2s,color .2s;}
+
+  /* SIDEBAR */
+  .sidebar{width:var(--sidebar-w);background:var(--surface,#fff);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:50;}
+  .sidebar-logo{padding:20px;display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;color:var(--accent);letter-spacing:-.5px;border-bottom:1px solid var(--border);text-decoration:none;}
+  .sidebar-logo svg{width:28px;height:28px;flex-shrink:0;}
+  .sidebar-nav{flex:1;padding:16px 12px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;text-decoration:none;margin-bottom:2px;}
+  .nav-item:hover{background:var(--paper);color:var(--ink);}
+  .nav-item.active{background:var(--soft);color:var(--accent);}
+  .nav-icon{width:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .sidebar-footer{padding:16px 12px;border-top:1px solid var(--border);}
+  .user-block{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;text-decoration:none;}
+  .user-block:hover{background:var(--paper);}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+  .user-info{flex:1;min-width:0;}
+  .user-name{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-email{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:6px;transition:color .15s;display:flex;align-items:center;}
+  .logout-btn:hover{color:var(--danger);}
+
+  /* MAIN */
+  .main{margin-left:var(--sidebar-w);flex:1;padding:40px 48px;max-width:960px;}
+  .page-header{margin-bottom:32px;}
+  .page-header h1{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:6px;}
+  .page-header p{font-size:14px;color:var(--muted);line-height:1.6;}
+
+  /* QUIZ SELECTOR */
+  .quiz-selector-row{display:flex;align-items:center;gap:12px;margin-bottom:32px;background:var(--surface,#fff);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;}
+  .quiz-selector-row label{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;}
+  .quiz-selector-row select{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--paper);color:var(--ink);outline:none;cursor:pointer;}
+  .quiz-selector-row select:focus{border-color:var(--accent);}
+
+  /* SECTION TITLE */
+  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:14px;margin-top:28px;}
+  .section-title:first-child{margin-top:0;}
+
+  /* INTEGRATION CARDS */
+  .int-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .int-card{background:var(--surface,#fff);border:1.5px solid var(--border);border-radius:16px;padding:24px;transition:all .2s;}
+  .int-card.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(168,85,247,.1);}
+  .int-card.full{grid-column:1/-1;}
+  .int-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .int-logo{display:flex;align-items:center;gap:12px;}
+  .int-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+  .int-name{font-size:15px;font-weight:700;color:var(--ink);}
+  .int-desc{font-size:12px;color:var(--muted);margin-top:1px;}
+  .toggle{width:40px;height:22px;border-radius:50px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0;}
+  .toggle.on{background:var(--accent);}
+  .toggle::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:var(--surface,#fff);top:3px;left:3px;transition:transform .2s;}
+  .toggle.on::after{transform:translateX(18px);}
+  .int-body{display:flex;flex-direction:column;gap:10px;}
+  .int-body.hidden{display:none;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;}
+  .field input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;background:var(--paper);color:var(--ink);outline:none;transition:border-color .2s;}
+  .field input:focus{border-color:var(--accent);background:var(--surface,#fff);}
+  .field-hint{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;}
+  .int-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+  .int-footer label{font-size:12px;color:var(--muted);}
+
+  /* SAVE BAR */
+  .save-bar{position:fixed;bottom:0;left:var(--sidebar-w);right:0;background:var(--surface,#fff);border-top:1px solid var(--border);padding:16px 48px;display:flex;align-items:center;justify-content:space-between;z-index:40;}
+  .save-bar span{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .btn-save{padding:10px 28px;border-radius:50px;background:var(--accent);color:#fff;font-family:inherit;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(168,85,247,.3);}
+  .btn-save:hover{background:var(--glow);}
+  .btn-save:disabled{opacity:.6;cursor:not-allowed;}
+
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading{display:flex;align-items:center;justify-content:center;padding:60px;gap:10px;color:var(--muted);}
+
+  @media(max-width:900px){
+    .sidebar{display:none;} .main{margin-left:0;padding:24px 20px;}
+    .int-grid{grid-template-columns:1fr;} .save-bar{left:0;padding:16px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <a href="/dashboard.html" class="sidebar-logo">
+    <svg viewBox="0 0 52 52" fill="none">
+      <rect x="4" y="5" width="44" height="9" rx="4.5" fill="#a855f7"/>
+      <rect x="10" y="18" width="32" height="8" rx="4" fill="#a855f7" opacity="0.65"/>
+      <rect x="18" y="30" width="16" height="7" rx="3.5" fill="#a855f7" opacity="0.4"/>
+      <path d="M22 40 L26 47 L30 40" stroke="#fb923c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    funnly
+  </a>
+  <nav class="sidebar-nav">
+    <a href="/dashboard.html" class="nav-item">
+      <span class="nav-icon"><i data-lucide="layout-grid" style="width:17px;height:17px"></i></span> Meus quizzes
+    </a>
+    <a href="/integrations.html" class="nav-item active">
+      <span class="nav-icon"><i data-lucide="plug" style="width:17px;height:17px"></i></span> Integrações
+    </a>
+    <a href="/settings.html" class="nav-item">
+      <span class="nav-icon"><i data-lucide="settings" style="width:17px;height:17px"></i></span> Configurações
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/settings.html" class="user-block">
+      <div class="avatar" id="user-avatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name">Carregando...</div>
+        <div class="user-email" id="user-email"></div>
+      </div>
+      <button class="logout-btn" onclick="handleLogout(event)" title="Sair">
+        <i data-lucide="log-out" style="width:16px;height:16px"></i>
+      </button>
+    </a>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h1>Integrações</h1>
+    <p>Configure pixels de rastreamento e webhooks para cada quiz. Os eventos são disparados automaticamente quando um respondente conclui o quiz.</p>
+  </div>
+
+  <div class="quiz-selector-row">
+    <label>Quiz:</label>
+    <select id="quiz-select" onchange="loadIntegrations()">
+      <option value="">Selecione um quiz...</option>
+    </select>
+  </div>
+
+  <div id="int-area">
+    <div class="loading"><div class="spinner"></div> Carregando quizzes...</div>
+  </div>
+</main>
+
+<div class="save-bar" id="save-bar" style="display:none">
+  <span id="save-status"></span>
+  <button class="btn-save" id="save-btn" onclick="saveIntegrations()">Salvar integrações</button>
+</div>
+
+<script>
+let sb = null, currentUser = null;
+let quizzes = [];
+let currentInt = null;
+let dirty = false;
+
+// ── Brand logos (SVG inline) ──────────────────────────────
+const BRAND_LOGOS = {
+  meta: `<svg width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 8C13.373 8 8 13.373 8 20C8 26.627 13.373 32 20 32C26.627 32 32 26.627 32 20C32 13.373 26.627 8 20 8Z" fill="#0081FB"/>
+    <path d="M14.5 17C14.5 17 16 14 18.5 14C21 14 22 16.5 22 16.5C22 16.5 23.5 13 26 13C28.5 13 29.5 16 29.5 16L27.5 27H24.5L23 19.5L20.5 27H17.5L16 19.5L14.5 27H11.5L14.5 17Z" fill="white"/>
+  </svg>`,
+  google_analytics: `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 1 1 0-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0 0 12.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748l-9.426-.013z" fill="#4285F4"/>
+    <path d="M2.543 12c0-5.523 4.478-10 10.002-10 2.764 0 5.268 1.119 7.09 2.927l-2.814 2.814A6.033 6.033 0 1 0 12.545 18.032l-.001 3.821C7.021 22 2.543 17.523 2.543 12z" fill="#34A853" opacity=".7"/>
+    <path d="M12.545 18.032a6.033 6.033 0 0 1-5.778-4.293H2.908A10.002 10.002 0 0 0 12.545 22l-.001-3.968z" fill="#FBBC05" opacity=".7"/>
+    <path d="M17.99 14.061H12.545v3.971h7.426a10.01 10.01 0 0 0 .437-2.293l-2.418.322z" fill="#EA4335" opacity=".7"/>
+  </svg>`,
+  google_ads: `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.215 15.71a4.014 4.014 0 0 0 5.484 1.463L13.427 7.5a4.013 4.013 0 1 0-6.946-4.012L2 11.76a4.014 4.014 0 0 0 .215 3.95z" fill="#FBBC04"/>
+    <path d="M21.785 15.71a4.014 4.014 0 0 1-5.484 1.463L10.573 7.5a4.013 4.013 0 1 1 6.946-4.012L22 11.76a4.014 4.014 0 0 1-.215 3.95z" fill="#4285F4"/>
+    <path d="M6 20a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="#34A853"/>
+  </svg>`,
+  gtm: `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#4285F4"/>
+    <path d="M2 17l10 5 10-5" fill="none" stroke="#34A853" stroke-width="2"/>
+    <path d="M2 12l10 5 10-5" fill="none" stroke="#FBBC04" stroke-width="2"/>
+  </svg>`,
+  tiktok: `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z" fill="#010101"/>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z" fill="#69C9D0" opacity=".5"/>
+  </svg>`,
+  webhook: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+  </svg>`,
+};
+
+const BRAND_ICON_BG = {
+  meta: '#e7f0ff',
+  google_analytics: '#e8f5e9',
+  google_ads: '#fff8e1',
+  gtm: '#e8f0fe',
+  tiktok: '#f3f3f3',
+  webhook: '#f0fdf4',
+};
+
+async function initSb() {
+  if (sb) return sb;
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  sb = createClient(window.__env?.SUPABASE_URL||'', window.__env?.SUPABASE_ANON_KEY||'');
+  return sb;
+}
+
+(async () => {
+  const client = await initSb();
+  const { data:{ session } } = await client.auth.getSession();
+  if (!session) { location.href='/'; return; }
+  currentUser = session.user;
+  const name = currentUser.user_metadata?.display_name || currentUser.email.split('@')[0];
+  document.getElementById('user-name').textContent = name;
+  document.getElementById('user-email').textContent = currentUser.email;
+  document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+  lucide.createIcons();
+  await loadQuizzes();
+})();
+
+async function loadQuizzes() {
+  const client = await initSb();
+  const { data } = await client.from('quizzes').select('id,title,slug').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  quizzes = data || [];
+  const sel = document.getElementById('quiz-select');
+  sel.innerHTML = '<option value="">Selecione um quiz...</option>' +
+    quizzes.map(q=>`<option value="${q.id}">${escHtml(q.title)}</option>`).join('');
+  document.getElementById('int-area').innerHTML = `<div style="text-align:center;padding:60px;color:var(--muted);font-size:14px">Selecione um quiz acima para configurar suas integrações.</div>`;
+}
+
+async function loadIntegrations() {
+  const qId = document.getElementById('quiz-select').value;
+  if (!qId) {
+    document.getElementById('int-area').innerHTML = `<div style="text-align:center;padding:60px;color:var(--muted);font-size:14px">Selecione um quiz acima para configurar suas integrações.</div>`;
+    document.getElementById('save-bar').style.display='none';
+    return;
+  }
+  document.getElementById('int-area').innerHTML = `<div class="loading"><div class="spinner"></div> Carregando...</div>`;
+  const client = await initSb();
+  const { data } = await client.from('quiz_integrations').select('*').eq('quiz_id',qId).single();
+  currentInt = data || {
+    quiz_id:qId,
+    meta_pixel_id:'', gtm_id:'',
+    ga4_id:'', google_ads_id:'',
+    tiktok_pixel_id:'', webhook_url:'', webhook_on_complete:true
+  };
+  dirty = false;
+  renderIntegrations();
+  document.getElementById('save-bar').style.display='flex';
+  document.getElementById('save-status').textContent='';
+  lucide.createIcons();
+}
+
+function brandIcon(key) {
+  return `<div class="int-icon" style="background:${BRAND_ICON_BG[key]||'#f5f5f5'}">${BRAND_LOGOS[key]||''}</div>`;
+}
+
+function renderIntegrations() {
+  const g = currentInt;
+  document.getElementById('int-area').innerHTML = `
+
+    <div class="section-title">Redes sociais</div>
+    <div class="int-grid">
+
+      <!-- META PIXEL -->
+      <div class="int-card ${g.meta_pixel_id?'active':''}" id="card-meta">
+        <div class="int-header">
+          <div class="int-logo">
+            ${brandIcon('meta')}
+            <div><div class="int-name">Meta Pixel</div><div class="int-desc">Facebook & Instagram Ads</div></div>
+          </div>
+          <button class="toggle ${g.meta_pixel_id?'on':''}" id="tog-meta" onclick="toggleCard('meta','meta_pixel_id')"></button>
+        </div>
+        <div class="int-body ${g.meta_pixel_id?'':'hidden'}" id="body-meta">
+          <div class="field">
+            <label>Pixel ID</label>
+            <input type="text" id="inp-meta" value="${escAttr(g.meta_pixel_id||'')}" placeholder="Ex: 1234567890123" oninput="setField('meta_pixel_id',this.value)">
+            <div class="field-hint">Dispara o evento <strong>Lead</strong> ao concluir o quiz.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIKTOK -->
+      <div class="int-card ${g.tiktok_pixel_id?'active':''}" id="card-tiktok">
+        <div class="int-header">
+          <div class="int-logo">
+            ${brandIcon('tiktok')}
+            <div><div class="int-name">TikTok Pixel</div><div class="int-desc">TikTok Ads</div></div>
+          </div>
+          <button class="toggle ${g.tiktok_pixel_id?'on':''}" id="tog-tiktok" onclick="toggleCard('tiktok','tiktok_pixel_id')"></button>
+        </div>
+        <div class="int-body ${g.tiktok_pixel_id?'':'hidden'}" id="body-tiktok">
+          <div class="field">
+            <label>Pixel ID</label>
+            <input type="text" id="inp-tiktok" value="${escAttr(g.tiktok_pixel_id||'')}" placeholder="Ex: CXXXXXXXXXXXXXXXXX" oninput="setField('tiktok_pixel_id',this.value)">
+            <div class="field-hint">Dispara o evento <strong>CompleteRegistration</strong>.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-title">Google</div>
+    <div class="int-grid">
+
+      <!-- GOOGLE ANALYTICS 4 -->
+      <div class="int-card ${g.ga4_id?'active':''}" id="card-ga4">
+        <div class="int-header">
+          <div class="int-logo">
+            ${brandIcon('google_analytics')}
+            <div><div class="int-name">Google Analytics 4</div><div class="int-desc">Métricas e comportamento</div></div>
+          </div>
+          <button class="toggle ${g.ga4_id?'on':''}" id="tog-ga4" onclick="toggleCard('ga4','ga4_id')"></button>
+        </div>
+        <div class="int-body ${g.ga4_id?'':'hidden'}" id="body-ga4">
+          <div class="field">
+            <label>Measurement ID</label>
+            <input type="text" id="inp-ga4" value="${escAttr(g.ga4_id||'')}" placeholder="Ex: G-XXXXXXXXXX" oninput="setField('ga4_id',this.value)">
+            <div class="field-hint">Envia o evento <strong>quiz_complete</strong> ao finalizar.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GOOGLE ADS -->
+      <div class="int-card ${g.google_ads_id?'active':''}" id="card-gads">
+        <div class="int-header">
+          <div class="int-logo">
+            ${brandIcon('google_ads')}
+            <div><div class="int-name">Google Ads</div><div class="int-desc">Conversões & remarketing</div></div>
+          </div>
+          <button class="toggle ${g.google_ads_id?'on':''}" id="tog-gads" onclick="toggleCard('gads','google_ads_id')"></button>
+        </div>
+        <div class="int-body ${g.google_ads_id?'':'hidden'}" id="body-gads">
+          <div class="field">
+            <label>Conversion ID</label>
+            <input type="text" id="inp-gads" value="${escAttr(g.google_ads_id||'')}" placeholder="Ex: AW-XXXXXXXXX" oninput="setField('google_ads_id',this.value)">
+            <div class="field-hint">Dispara conversão ao concluir o quiz.</div>
+          </div>
+          <div class="field">
+            <label>Conversion Label <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+            <input type="text" id="inp-gads-label" value="${escAttr(g.google_ads_label||'')}" placeholder="Ex: AbCdEfGhIjKl-MnO" oninput="setField('google_ads_label',this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- GOOGLE TAG MANAGER -->
+      <div class="int-card ${g.gtm_id?'active':''} full" id="card-gtm">
+        <div class="int-header">
+          <div class="int-logo">
+            ${brandIcon('gtm')}
+            <div><div class="int-name">Google Tag Manager</div><div class="int-desc">Gerenciador de tags — inclui GA4, Ads e outros</div></div>
+          </div>
+          <button class="toggle ${g.gtm_id?'on':''}" id="tog-gtm" onclick="toggleCard('gtm','gtm_id')"></button>
+        </div>
+        <div class="int-body ${g.gtm_id?'':'hidden'}" id="body-gtm">
+          <div class="field" style="max-width:360px">
+            <label>Container ID</label>
+            <input type="text" id="inp-gtm" value="${escAttr(g.gtm_id||'')}" placeholder="Ex: GTM-XXXXXXX" oninput="setField('gtm_id',this.value)">
+            <div class="field-hint">Injeta o GTM e dispara <strong>quiz_complete</strong> no dataLayer. Use GTM quando quiser gerenciar múltiplas tags num só lugar.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-title">Automações</div>
+    <div class="int-grid">
+
+      <!-- WEBHOOK -->
+      <div class="int-card ${g.webhook_url?'active':''} full" id="card-webhook">
+        <div class="int-header">
+          <div class="int-logo">
+            ${brandIcon('webhook')}
+            <div><div class="int-name">Webhook</div><div class="int-desc">n8n, Make, Zapier, API própria</div></div>
+          </div>
+          <button class="toggle ${g.webhook_url?'on':''}" id="tog-webhook" onclick="toggleCard('webhook','webhook_url')"></button>
+        </div>
+        <div class="int-body ${g.webhook_url?'':'hidden'}" id="body-webhook">
+          <div class="field">
+            <label>URL do endpoint</label>
+            <input type="url" id="inp-webhook" value="${escAttr(g.webhook_url||'')}" placeholder="https://n8n.seusite.com/webhook/abc123" oninput="setField('webhook_url',this.value)">
+          </div>
+          <div class="int-footer">
+            <label>Disparar apenas ao concluir o quiz</label>
+            <button class="toggle ${g.webhook_on_complete!==false?'on':''}" id="tog-webhook-complete" onclick="toggleBool('webhook_on_complete','tog-webhook-complete')"></button>
+          </div>
+          <div class="field-hint" style="margin-top:8px">Envia um POST com JSON contendo: <code>respondent</code>, <code>answers</code>, <code>quiz_id</code>, <code>completed_at</code>.</div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+function toggleCard(name, field) {
+  const hasValue = !!(currentInt[field]||'').trim();
+  const tog = document.getElementById(`tog-${name}`);
+  const body = document.getElementById(`body-${name}`);
+  const card = document.getElementById(`card-${name}`);
+  if (hasValue) {
+    currentInt[field] = '';
+    tog.classList.remove('on'); body.classList.add('hidden'); card.classList.remove('active');
+  } else {
+    body.classList.remove('hidden'); tog.classList.add('on'); card.classList.add('active');
+    setTimeout(()=>document.getElementById(`inp-${name}`)?.focus(), 50);
+  }
+  markDirty();
+}
+
+function setField(field, value) {
+  currentInt[field] = value;
+  const cardMap = {
+    meta_pixel_id:'meta', gtm_id:'gtm',
+    ga4_id:'ga4', google_ads_id:'gads', google_ads_label:'gads',
+    tiktok_pixel_id:'tiktok', webhook_url:'webhook'
+  };
+  const name = cardMap[field];
+  if (name) document.getElementById(`card-${name}`)?.classList.toggle('active', !!value.trim());
+  markDirty();
+}
+
+function toggleBool(field, togId) {
+  currentInt[field] = currentInt[field] === false ? true : false;
+  document.getElementById(togId)?.classList.toggle('on', currentInt[field] !== false);
+  markDirty();
+}
+
+function markDirty() {
+  dirty = true;
+  document.getElementById('save-status').innerHTML = '<i data-lucide="dot" style="width:14px;height:14px"></i> alterações não salvas';
+  lucide.createIcons();
+}
+
+async function saveIntegrations() {
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  const client = await initSb();
+  const payload = {
+    quiz_id: currentInt.quiz_id,
+    meta_pixel_id: currentInt.meta_pixel_id?.trim()||null,
+    gtm_id: currentInt.gtm_id?.trim()||null,
+    ga4_id: currentInt.ga4_id?.trim()||null,
+    google_ads_id: currentInt.google_ads_id?.trim()||null,
+    google_ads_label: currentInt.google_ads_label?.trim()||null,
+    tiktok_pixel_id: currentInt.tiktok_pixel_id?.trim()||null,
+    webhook_url: currentInt.webhook_url?.trim()||null,
+    webhook_on_complete: currentInt.webhook_on_complete !== false,
+  };
+  if (currentInt.id) {
+    await client.from('quiz_integrations').update(payload).eq('id', currentInt.id);
+  } else {
+    const { data } = await client.from('quiz_integrations').insert(payload).select().single();
+    if (data) currentInt.id = data.id;
+  }
+  dirty = false;
+  btn.disabled = false; btn.textContent = 'Salvar integrações';
+  document.getElementById('save-status').innerHTML = '<i data-lucide="check" style="width:14px;height:14px;color:var(--success)"></i> Salvo com sucesso';
+  lucide.createIcons();
+  setTimeout(()=>{ document.getElementById('save-status').textContent=''; }, 3000);
+}
+
+async function handleLogout(e) {
+  e.preventDefault(); e.stopPropagation();
+  const client = await initSb();
+  await client.auth.signOut();
+  location.href = '/';
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+</script>
+</body>
+</html>

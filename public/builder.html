@@ -3,703 +3,1773 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InLead — Builder</title>
+<title>Funnly — Builder</title>
+<script>if(localStorage.getItem('funnly-theme')==='dark')document.body.classList.add('dark')</script>
 <script src="/api/env"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
   :root {
-    --ink:    #0d0d12;
-    --paper:  #f7f5f0;
-    --accent: #5a3af7;
-    --glow:   #7c5cfc;
-    --soft:   #e8e4ff;
-    --muted:  #9190a4;
-    --border: #e2e0ee;
-    --danger: #e5484d;
-    --success:#22c55e;
-    --radius: 12px;
-    --left:   260px;
-    --right:  300px;
+    --ink:     #0f0a1e;
+    --paper:   #f9f7ff;
+    --surface: #ffffff;
+    --accent:  #a855f7;
+    --glow:    #9333ea;
+    --soft:    #f3ebff;
+    --muted:   #9d8fb0;
+    --border:  #e8e0f5;
+    --danger:  #e5484d;
+    --success: #22c55e;
+    --cta:     #fb923c;
+    --radius:  12px;
+    --left:    260px;
+    --right:   300px;
+  }
+  body.dark {
+    --ink:     #f0ecff;
+    --paper:   #0a0a0f;
+    --surface: #110d1f;
+    --accent:  #a855f7;
+    --glow:    #c084fc;
+    --soft:    #1a1030;
+    --muted:   #7c6f9a;
+    --border:  #1e1a2e;
+    --danger:  #f87171;
+    --success: #4ade80;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--paper); color: var(--ink); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background .2s, color .2s; }
+
+  /* ── ICONS ── */
+  .icon    { width: 16px; height: 16px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
+  .icon-lg { width: 20px; height: 20px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
+  .icon-xl { width: 24px; height: 24px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
 
   /* ── TOP BAR ── */
   .topbar {
-    height: 56px; background: #fff; border-bottom: 1px solid var(--border);
+    height: 56px; background: var(--surface); border-bottom: 1px solid var(--border);
     display: flex; align-items: center; padding: 0 20px; gap: 12px;
     flex-shrink: 0; z-index: 100;
   }
-  .topbar-logo {
-    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
-    color: var(--accent); text-decoration: none; letter-spacing: -.5px; margin-right: 8px;
-  }
-  .topbar-logo span { color: var(--ink); }
-  .topbar-back {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 13px; color: var(--muted); cursor: pointer;
-    padding: 6px 10px; border-radius: 8px; border: none; background: none; transition: all .15s;
-  }
+  .topbar-logo { display: flex; align-items: center; gap: 7px; font-weight: 800; font-size: 18px; color: var(--accent); text-decoration: none; letter-spacing: -.5px; margin-right: 4px; }
+  .topbar-logo svg { width: 26px; height: 26px; }
+  .topbar-back { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; padding: 6px 10px; border-radius: 8px; border: none; background: none; transition: all .15s; font-family: inherit; }
   .topbar-back:hover { background: var(--paper); color: var(--ink); }
-  .quiz-title-input {
-    flex: 1; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
-    border: none; background: transparent; outline: none; color: var(--ink);
-    text-align: center; letter-spacing: -.3px;
-  }
+  .quiz-title-input { flex: 1; font-size: 15px; font-weight: 700; border: none; background: transparent; outline: none; color: var(--ink); text-align: center; letter-spacing: -.3px; font-family: inherit; }
   .quiz-title-input::placeholder { color: var(--muted); font-weight: 400; }
   .topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-  .btn-sm {
-    padding: 8px 16px; border-radius: 8px;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: all .15s; border: 1.5px solid var(--border);
-    background: transparent; color: var(--ink);
-  }
-  .btn-sm:hover { background: var(--paper); }
-  .btn-sm.primary {
-    background: var(--accent); color: #fff; border-color: transparent;
-    box-shadow: 0 2px 10px rgba(90,58,247,.3);
-  }
+  .btn-sm { padding: 8px 14px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .15s; border: 1.5px solid var(--border); background: transparent; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+  .btn-sm:hover { background: var(--soft); }
+  .btn-sm.primary { background: var(--accent); color: #fff; border-color: transparent; box-shadow: 0 2px 10px rgba(168,85,247,.3); }
   .btn-sm.primary:hover { background: var(--glow); }
-  .save-indicator { font-size: 12px; color: var(--muted); }
+  .btn-sm.published { background: var(--success); color: #fff; border-color: transparent; }
+  .btn-icon { width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .btn-icon:hover { background: var(--soft); color: var(--ink); border-color: var(--accent); }
+  .save-indicator { font-size: 12px; color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: 4px; }
 
   /* ── LAYOUT ── */
   .builder-layout { flex: 1; display: flex; overflow: hidden; }
 
-  /* ── LEFT: STEPS LIST ── */
-  .steps-panel {
-    width: var(--left); background: #fff; border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; overflow: hidden;
-  }
-  .steps-header {
-    padding: 16px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .steps-header h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
-  .add-step-btn {
-    width: 28px; height: 28px; border-radius: 8px;
-    background: var(--soft); color: var(--accent); border: none;
-    font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all .15s;
-  }
+  /* ── LEFT PANEL ── */
+  .steps-panel { width: var(--left); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; transition: width .25s, opacity .25s; }
+  .steps-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .steps-header h3 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .add-step-btn { width: 28px; height: 28px; border-radius: 8px; background: var(--soft); color: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
   .add-step-btn:hover { background: var(--accent); color: #fff; }
   .steps-list { flex: 1; overflow-y: auto; padding: 8px; }
-  .step-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 12px; border-radius: 10px;
-    cursor: pointer; transition: all .15s; margin-bottom: 2px;
-    border: 1.5px solid transparent;
-  }
+
+  .step-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: all .15s; margin-bottom: 2px; border: 1.5px solid transparent; user-select: none; }
   .step-item:hover { background: var(--paper); }
-  .step-item.active { background: var(--soft); border-color: rgba(90,58,247,.25); }
-  .step-num {
-    width: 24px; height: 24px; border-radius: 7px;
-    background: var(--paper); color: var(--muted);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; flex-shrink: 0;
-  }
+  .step-item.active { background: var(--soft); border-color: rgba(168,85,247,.25); }
+  .step-num { width: 24px; height: 24px; border-radius: 7px; background: var(--paper); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
   .step-item.active .step-num { background: var(--accent); color: #fff; }
-  .step-text { flex: 1; font-size: 13px; font-weight: 400; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .step-type-badge {
-    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
-    background: var(--paper); color: var(--muted); text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0;
-  }
-  .step-del {
-    opacity: 0; background: none; border: none; color: var(--danger);
-    cursor: pointer; padding: 2px; border-radius: 4px; font-size: 14px; transition: opacity .15s;
-  }
+  .step-text { flex: 1; font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .step-text.empty { color: var(--muted); font-weight: 400; font-style: italic; }
+  .step-type-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: var(--paper); color: var(--muted); text-transform: uppercase; letter-spacing: .5px; flex-shrink: 0; }
+  .step-del { opacity: 0; background: none; border: none; color: var(--danger); cursor: pointer; padding: 4px; border-radius: 4px; transition: opacity .15s; line-height: 1; display: flex; align-items: center; }
   .step-item:hover .step-del { opacity: 1; }
 
-  /* ── CENTER: PREVIEW ── */
-  .preview-area {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: flex-start;
-    padding: 24px 0; overflow-y: auto; background: var(--paper);
-  }
-  .device-toggle {
-    display: flex; gap: 4px; background: #fff; border: 1px solid var(--border);
-    border-radius: 10px; padding: 4px; margin-bottom: 20px;
-  }
-  .device-btn {
-    padding: 6px 14px; border-radius: 7px; border: none; background: none;
-    font-size: 13px; cursor: pointer; transition: all .15s; color: var(--muted);
-  }
+  /* ── CENTER PREVIEW ── */
+  .preview-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 24px 16px; overflow-y: auto; background: var(--paper); position: relative; }
+  .device-toggle { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; margin-bottom: 20px; }
+  .device-btn { padding: 6px 14px; border-radius: 7px; border: none; background: none; font-size: 13px; cursor: pointer; transition: all .15s; color: var(--muted); font-family: inherit; display: flex; align-items: center; gap: 6px; }
   .device-btn.active { background: var(--accent); color: #fff; }
-  .device-frame {
-    background: #fff; border-radius: 16px;
-    box-shadow: 0 8px 40px rgba(0,0,0,.1);
-    overflow: hidden; transition: all .3s;
-    width: 480px;
-  }
+  .device-frame { background: var(--surface); border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,.1); overflow: hidden; transition: width .3s; width: 480px; }
   .device-frame.mobile { width: 375px; }
-  .device-preview {
-    padding: 32px 28px; min-height: 480px;
-    display: flex; flex-direction: column;
-  }
-  .preview-question-type {
-    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px;
-    color: var(--accent); margin-bottom: 20px;
-  }
-  .preview-title {
-    font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700;
-    letter-spacing: -.5px; margin-bottom: 8px; line-height: 1.2;
-  }
-  .preview-desc { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
-  .preview-options { display: flex; flex-direction: column; gap: 10px; }
-  .preview-option {
-    padding: 14px 16px; border-radius: 10px;
-    border: 1.5px solid var(--border); font-size: 14px;
-    cursor: not-allowed; background: #fafafa; transition: all .15s;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .preview-option:first-child { border-color: var(--accent); background: var(--soft); }
-  .preview-input-mock {
-    width: 100%; padding: 14px 16px; border-radius: 10px;
-    border: 1.5px solid var(--border); font-family: 'DM Sans', sans-serif; font-size: 15px;
-    background: #fafafa; color: var(--muted); pointer-events: none;
-  }
-  .preview-btn-mock {
-    margin-top: 20px; padding: 15px 28px; border-radius: 50px;
-    background: var(--accent); color: #fff; font-size: 15px; font-weight: 500;
-    border: none; cursor: not-allowed; align-self: flex-start;
-  }
+  .device-preview { padding: 32px 28px; min-height: 480px; display: flex; flex-direction: column; }
+  .preview-type-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 16px; }
+  .preview-title { font-size: 22px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 8px; line-height: 1.25; color: var(--ink); }
+  .preview-desc { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+  .preview-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .preview-option { padding: 13px 16px; border-radius: 10px; border: 1.5px solid var(--border); font-size: 14px; background: var(--paper); display: flex; align-items: center; gap: 10px; pointer-events: none; }
+  .preview-option.first { border-color: var(--accent); background: var(--soft); color: var(--accent); }
+  .preview-input-mock { width: 100%; padding: 14px 16px; border-radius: 10px; border: 1.5px solid var(--border); font-size: 15px; background: var(--paper); color: var(--muted); pointer-events: none; margin-bottom: 20px; font-family: inherit; }
+  .preview-btn { padding: 14px 28px; border-radius: 12px; background: var(--cta); color: #fff; font-size: 15px; font-weight: 700; border: none; pointer-events: none; align-self: flex-start; font-family: inherit; margin-top: auto; }
+  .preview-pic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; width: 100%; }
+  .preview-pic-opt { border-radius: 12px; border: 1.5px solid var(--border); background: var(--paper); overflow: hidden; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+  .preview-pic-opt.first { border-color: var(--accent); background: var(--soft); }
+  .preview-pic-opt img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .preview-pic-placeholder { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--paper); color: var(--muted); }
+  .preview-pic-opt span { padding: 8px; font-size: 13px; font-weight: 600; color: var(--ink); text-align: center; }
+  .preview-stars { display: flex; gap: 6px; margin-bottom: 20px; color: var(--accent); }
+  .preview-stars svg { width: 28px; height: 28px; }
+  .preview-nps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+  .preview-nps-btn { width: 36px; height: 36px; border-radius: 8px; background: var(--paper); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; pointer-events: none; }
+  .preview-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); text-align: center; gap: 12px; }
 
-  /* ── RIGHT: EDIT PANEL ── */
-  .edit-panel {
-    width: var(--right); background: #fff; border-left: 1px solid var(--border);
-    overflow-y: auto; padding: 0;
-  }
-  .panel-section { padding: 20px; border-bottom: 1px solid var(--border); }
+  /* ── RIGHT PANEL ── */
+  .edit-panel { width: var(--right); background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; transition: width .25s, opacity .25s; }
+
+  /* TABS */
+  .panel-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .panel-tab { flex: 1; padding: 13px 6px; border: none; background: none; font-family: inherit; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all .15s; border-bottom: 2px solid transparent; text-align: center; }
+  .panel-tab:hover { color: var(--ink); }
+  .panel-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .panel-body { flex: 1; overflow-y: auto; }
+  .panel-section { padding: 18px 20px; border-bottom: 1px solid var(--border); }
   .panel-section:last-child { border-bottom: none; }
-  .panel-label {
-    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
-    color: var(--muted); margin-bottom: 14px;
-  }
-  .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 12px; font-weight: 500; color: #555; margin-bottom: 5px; }
+  .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 12px; }
+
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
   .field input, .field textarea, .field select {
-    width: 100%; padding: 10px 12px;
+    width: 100%; padding: 9px 11px;
     border: 1.5px solid var(--border); border-radius: 8px;
-    font-family: 'DM Sans', sans-serif; font-size: 14px;
-    outline: none; transition: border-color .2s; background: #fafafa; color: var(--ink);
+    font-family: inherit; font-size: 13px;
+    outline: none; transition: border-color .2s; background: var(--paper); color: var(--ink);
     resize: vertical;
   }
-  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); background: #fff; }
-  .field select { cursor: pointer; }
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; }
-  .toggle {
-    width: 40px; height: 22px; border-radius: 50px;
-    background: var(--border); position: relative; cursor: pointer; transition: background .2s;
-    border: none; flex-shrink: 0;
-  }
-  .toggle.on { background: var(--accent); }
-  .toggle::after {
-    content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%;
-    background: #fff; top: 3px; left: 3px; transition: transform .2s;
-  }
-  .toggle.on::after { transform: translateX(18px); }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); background: var(--surface); }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  /* OPTIONS EDITOR */
-  .options-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-  .option-row {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--paper); border-radius: 8px; padding: 6px 8px;
-  }
-  .option-row input {
-    flex: 1; border: none; background: transparent; outline: none;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); padding: 2px;
-  }
-  .option-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 4px; border-radius: 4px; }
-  .option-del:hover { color: var(--danger); }
-  .add-option-btn {
-    width: 100%; padding: 9px; border-radius: 8px;
-    border: 1.5px dashed var(--border); background: transparent;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted);
-    cursor: pointer; transition: all .15s;
-  }
-  .add-option-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* TYPE PICKER */
-  .type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  .type-btn {
-    padding: 10px 8px; border-radius: 8px; border: 1.5px solid var(--border);
-    background: transparent; cursor: pointer; text-align: center;
-    font-size: 12px; color: var(--muted); transition: all .15s;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-  }
+  /* TYPE GRID */
+  .type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+  .type-btn { padding: 9px 4px; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; text-align: center; font-size: 11px; color: var(--muted); transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 5px; font-family: inherit; font-weight: 500; }
   .type-btn:hover { border-color: var(--accent); color: var(--accent); }
   .type-btn.active { border-color: var(--accent); background: var(--soft); color: var(--accent); }
-  .type-icon { font-size: 18px; }
+
+  /* TOGGLE */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+  .toggle-row label { font-size: 13px; color: var(--ink); cursor: pointer; }
+  .toggle { width: 38px; height: 21px; border-radius: 50px; background: var(--border); position: relative; cursor: pointer; transition: background .2s; border: none; flex-shrink: 0; }
+  .toggle.on { background: var(--accent); }
+  .toggle::after { content: ''; position: absolute; width: 15px; height: 15px; border-radius: 50%; background: #fff; top: 3px; left: 3px; transition: transform .2s; }
+  .toggle.on::after { transform: translateX(17px); }
+
+  /* OPTIONS */
+  .options-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+  .option-row { display: flex; align-items: center; gap: 6px; background: var(--paper); border-radius: 8px; padding: 6px 8px; }
+  .option-emoji { font-size: 15px; cursor: pointer; flex-shrink: 0; padding: 2px; border-radius: 4px; }
+  .option-emoji:hover { background: var(--border); }
+  .option-input { flex: 1; border: none; background: transparent; outline: none; font-family: inherit; font-size: 13px; color: var(--ink); padding: 2px; }
+  .option-del { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; flex-shrink: 0; }
+  .option-del:hover { color: var(--danger); }
+  .add-option-btn { width: 100%; padding: 8px; border-radius: 8px; border: 1.5px dashed var(--border); background: transparent; font-family: inherit; font-size: 12px; color: var(--muted); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .add-option-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* PICTURE OPTIONS EDITOR */
+  .pic-opts-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+  .pic-opt-row { display: flex; align-items: center; gap: 8px; background: var(--paper); border-radius: 10px; padding: 8px; }
+  .pic-opt-thumb { width: 52px; height: 52px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .pic-opt-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .pic-opt-fields { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .pic-opt-label { border: none; background: transparent; outline: none; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink); padding: 2px; }
+  .pic-opt-url { border: none; background: transparent; outline: none; font-family: inherit; font-size: 11px; color: var(--muted); padding: 2px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pic-opt-url:focus { color: var(--ink); }
+
+  /* COLOR */
+  .color-row { display: flex; align-items: center; gap: 8px; }
+  .color-row input[type="color"] { width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid var(--border); padding: 2px; cursor: pointer; background: none; flex-shrink: 0; }
+  .color-row input[type="text"] { flex: 1; }
+
+  /* BUTTON SIZE / SHAPE PICKER */
+  .btn-size-row { display: flex; gap: 6px; }
+  .btn-size-opt, .btn-shape-opt { flex: 1; padding: 7px 0; border-radius: 8px; border: 1.5px solid var(--border); background: transparent; font-size: 12px; font-weight: 500; color: var(--muted); cursor: pointer; font-family: inherit; transition: all .15s; }
+  .btn-size-opt:hover, .btn-shape-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-size-opt.active, .btn-shape-opt.active { background: var(--soft); border-color: var(--accent); color: var(--accent); font-weight: 700; }
 
   /* EMPTY PANEL */
-  .empty-panel {
-    padding: 40px 20px; text-align: center; color: var(--muted);
-  }
-  .empty-panel p { font-size: 13px; line-height: 1.6; }
+  .panel-empty { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.6; }
 
-  /* ADD TYPE MODAL */
-  .modal-overlay {
-    position: fixed; inset: 0; z-index: 999;
-    background: rgba(13,13,18,.6); backdrop-filter: blur(8px);
-    display: none; align-items: center; justify-content: center; padding: 20px;
-  }
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(15,10,30,.55); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
-  .modal {
-    background: #fff; border-radius: 20px; padding: 28px;
-    width: 100%; max-width: 460px;
-    box-shadow: 0 24px 80px rgba(0,0,0,.2);
-    animation: slideUp .25s cubic-bezier(.16,1,.3,1);
-  }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  .modal h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .modal { background: var(--surface); border-radius: 20px; padding: 28px; width: 100%; max-width: 480px; box-shadow: 0 24px 80px rgba(0,0,0,.3); animation: slideUp .25s cubic-bezier(.16,1,.3,1); }
+  @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
+  .modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 6px; color: var(--ink); }
   .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-  .type-picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .type-picker-btn {
-    padding: 14px 8px; border-radius: 10px; border: 1.5px solid var(--border);
-    background: transparent; cursor: pointer; text-align: center;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    transition: all .15s;
-  }
+  .type-picker-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .type-picker-btn { padding: 14px 8px; border-radius: 10px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all .15s; font-family: inherit; }
   .type-picker-btn:hover { border-color: var(--accent); background: var(--soft); }
-  .type-picker-btn .ti { font-size: 24px; }
-  .type-picker-btn .tl { font-size: 12px; color: var(--ink); font-weight: 500; }
+  .type-picker-btn .ti { color: var(--accent); }
+  .type-picker-btn .tl { font-size: 12px; color: var(--ink); font-weight: 600; }
   .type-picker-btn .td { font-size: 11px; color: var(--muted); }
+
+  /* ── FLOW CANVAS ── */
+  body[data-mode="flow"] .steps-panel,
+  body[data-mode="flow"] .edit-panel { width: 0; opacity: 0; overflow: hidden; padding: 0; min-width: 0; }
+  body[data-mode="flow"] .steps-panel { border-right: none; }
+  body[data-mode="flow"] .edit-panel  { border-left: none; }
+  .steps-panel, .edit-panel { transition: width .25s ease, opacity .25s ease, min-width .25s ease; }
+
+  .flow-canvas {
+    display: none; position: absolute; inset: 0;
+    overflow: hidden; cursor: default; user-select: none;
+    background: var(--paper);
+    background-image: radial-gradient(var(--border) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .flow-canvas.active { display: block; }
+
+  #flow-world { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+
+  #flow-svg { position: absolute; top: 0; left: 0; overflow: visible; pointer-events: none; }
+  #flow-svg path.conn { pointer-events: stroke; cursor: pointer; }
+  #flow-svg path.conn:hover { stroke-width: 3; }
+  #flow-svg path.conn.selected { stroke-width: 3; }
+
+  #flow-nodes { position: absolute; top: 0; left: 0; }
+
+  .flow-node {
+    position: absolute; width: 210px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 14px; cursor: grab; box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    transition: border-color .15s, box-shadow .15s;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .flow-node:hover { border-color: var(--accent); box-shadow: 0 4px 20px rgba(168,85,247,.15); }
+  .flow-node.selected { border-color: var(--accent); border-width: 2px; box-shadow: 0 4px 24px rgba(168,85,247,.2); }
+  .flow-node.dragging { cursor: grabbing; box-shadow: 0 8px 32px rgba(0,0,0,.18); }
+
+  .node-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .node-header-icon { width: 28px; height: 28px; border-radius: 8px; background: var(--soft); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--accent); }
+  .node-header-type { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; flex: 1; }
+  .node-special { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; }
+
+  .node-body { padding: 10px 12px; font-size: 13px; color: var(--ink); font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
+  .node-body.empty { color: var(--muted); font-style: italic; font-weight: 400; }
+
+  .node-ports-out { position: relative; }
+  .node-port-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 12px; font-size: 11px; color: var(--muted); }
+  .node-port-row:last-child { padding-bottom: 8px; }
+  .port-out {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent); border: 2px solid var(--surface);
+    cursor: crosshair; flex-shrink: 0; box-shadow: 0 0 0 1px var(--accent);
+    transition: transform .15s;
+  }
+  .port-out:hover { transform: scale(1.4); }
+  .port-in {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--border); border: 2px solid var(--surface);
+    position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  /* FLOW CONTROLS */
+  .flow-controls {
+    position: absolute; bottom: 24px; right: 24px;
+    display: flex; gap: 4px; z-index: 10;
+  }
+  .flow-ctrl-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s; font-family: inherit;
+  }
+  .flow-ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+  #zoom-label { width: 52px; font-size: 12px; }
+
+  /* CONTEXT MENU */
+  .ctx-menu {
+    position: fixed; z-index: 9999; background: var(--surface);
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 4px; box-shadow: 0 8px 24px rgba(0,0,0,.15); min-width: 160px;
+  }
+  .ctx-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+    border-radius: 7px; font-size: 13px; cursor: pointer; color: var(--ink);
+    font-family: inherit; background: none; border: none; width: 100%; text-align: left;
+    transition: background .1s;
+  }
+  .ctx-item:hover { background: var(--soft); }
+  .ctx-item.danger { color: var(--danger); }
+  .ctx-item.danger:hover { background: rgba(229,72,77,.08); }
+
+  /* DELETE CONNECTION BUTTON (scissors icon) */
+  .conn-del-btn {
+    position: fixed; z-index: 9998; background: var(--surface); color: var(--danger);
+    border: 1.5px solid var(--danger); border-radius: 8px; padding: 6px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15); transition: background .15s;
+  }
+  .conn-del-btn:hover { background: var(--danger); color: #fff; }
+
+  /* FLOW DRAWER */
+  .flow-drawer {
+    position: fixed; right: -320px; top: 56px;
+    width: 300px; height: calc(100vh - 56px);
+    background: var(--surface); border-left: 1.5px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+    transition: right .25s cubic-bezier(.16,1,.3,1); z-index: 200;
+    box-shadow: -4px 0 24px rgba(0,0,0,.08);
+  }
+  .flow-drawer.open { right: 0; }
+  .drawer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .drawer-header span { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .drawer-close { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; border-radius: 6px; display: flex; align-items: center; }
+  .drawer-close:hover { background: var(--soft); color: var(--ink); }
+  #drawer-body { flex: 1; overflow-y: auto; }
+
+  /* VIDEO PREVIEW */
+  .video-preview-wrap { position: relative; padding-bottom: 56.25%; background: var(--soft); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+  .video-preview-wrap iframe, .video-preview-wrap video { position: absolute; inset: 0; width: 100%; height: 100%; border: none; border-radius: 12px; }
+  .video-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--muted); gap: 8px; font-size: 13px; }
+
+  /* SCROLLBARS */
+  * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 </style>
 </head>
 <body>
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <a href="/dashboard.html" class="topbar-logo">In<span>Lead</span></a>
-  <button class="topbar-back" onclick="window.location.href='/dashboard.html'">← Dashboard</button>
+  <a href="/dashboard.html" class="topbar-logo">
+    <svg viewBox="0 0 52 52" fill="none">
+      <rect x="4" y="5" width="44" height="9" rx="4.5" fill="#a855f7"/>
+      <rect x="10" y="18" width="32" height="8" rx="4" fill="#a855f7" opacity="0.65"/>
+      <rect x="18" y="30" width="16" height="7" rx="3.5" fill="#a855f7" opacity="0.4"/>
+      <path d="M22 40 L26 47 L30 40" stroke="#fb923c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    funnly
+  </a>
+  <button class="topbar-back" onclick="window.location.href='/dashboard.html'">
+    <i data-lucide="chevron-left" class="icon"></i> Voltar
+  </button>
   <input class="quiz-title-input" id="quiz-title-input" placeholder="Nome do quiz..." maxlength="80">
   <div class="topbar-right">
     <span class="save-indicator" id="save-indicator"></span>
-    <button class="btn-sm" onclick="previewQuiz()">👁 Preview</button>
-    <button class="btn-sm" id="status-btn" onclick="togglePublish()">Publicar</button>
+    <button class="btn-icon" onclick="toggleTheme()" id="theme-btn" title="Alternar tema">
+      <i data-lucide="moon" class="icon-lg" id="theme-icon"></i>
+    </button>
+    <button class="btn-icon" onclick="toggleMode()" id="mode-btn" title="Modo Fluxo">
+      <i data-lucide="git-fork" class="icon-lg" id="mode-icon"></i>
+    </button>
+    <button class="btn-sm" onclick="previewQuiz()">
+      <i data-lucide="eye" class="icon"></i> Preview
+    </button>
+    <button class="btn-sm" id="status-btn" onclick="togglePublish()">
+      <i data-lucide="zap" class="icon" id="status-icon"></i>
+      <span id="status-label">Publicar</span>
+    </button>
     <button class="btn-sm primary" onclick="saveAll()">Salvar</button>
   </div>
 </div>
 
-<!-- BUILDER LAYOUT -->
+<!-- LAYOUT -->
 <div class="builder-layout">
 
-  <!-- LEFT: STEPS -->
+  <!-- LEFT: PERGUNTAS -->
   <div class="steps-panel">
     <div class="steps-header">
       <h3>Perguntas</h3>
-      <button class="add-step-btn" onclick="openAddModal()" title="Adicionar pergunta">+</button>
+      <button class="add-step-btn" onclick="openAddModal()" title="Nova pergunta">
+        <i data-lucide="plus" class="icon"></i>
+      </button>
     </div>
-    <div class="steps-list" id="steps-list">
-      <!-- renderizado por JS -->
-    </div>
+    <div class="steps-list" id="steps-list"></div>
   </div>
 
   <!-- CENTER: PREVIEW -->
   <div class="preview-area">
     <div class="device-toggle">
-      <button class="device-btn active" id="dv-desktop" onclick="setDevice('desktop')">💻 Desktop</button>
-      <button class="device-btn" id="dv-mobile" onclick="setDevice('mobile')">📱 Mobile</button>
+      <button class="device-btn active" id="dv-desktop" onclick="setDevice('desktop')">
+        <i data-lucide="monitor" class="icon"></i> Desktop
+      </button>
+      <button class="device-btn" id="dv-mobile" onclick="setDevice('mobile')">
+        <i data-lucide="smartphone" class="icon"></i> Mobile
+      </button>
     </div>
     <div class="device-frame" id="device-frame">
       <div class="device-preview" id="device-preview">
-        <!-- renderizado por JS -->
+        <div class="preview-empty">
+          <i data-lucide="layout-template" style="width:40px;height:40px;color:var(--muted)"></i>
+          <div>Adicione perguntas<br>para visualizar</div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- RIGHT: EDIT PANEL -->
   <div class="edit-panel" id="edit-panel">
-    <div class="empty-panel">
-      <p>Selecione uma pergunta na lista<br>para editar suas propriedades.</p>
-    </div>
+    <div class="panel-empty">Selecione uma pergunta<br>para editar.</div>
   </div>
 
 </div>
 
-<!-- ADD QUESTION TYPE MODAL -->
-<div class="modal-overlay" id="add-modal" onclick="closeAddOutside(event)">
+<!-- FLOW CANVAS -->
+<div id="flow-canvas" class="flow-canvas">
+  <div id="flow-world">
+    <svg id="flow-svg"></svg>
+    <div id="flow-nodes"></div>
+  </div>
+  <div class="flow-controls">
+    <button class="flow-ctrl-btn" onclick="flowZoomIn()" title="Ampliar"><i data-lucide="plus" class="icon"></i></button>
+    <button class="flow-ctrl-btn" id="zoom-label" onclick="flowZoomReset()">100%</button>
+    <button class="flow-ctrl-btn" onclick="flowZoomOut()" title="Reduzir"><i data-lucide="minus" class="icon"></i></button>
+  </div>
+</div>
+
+<!-- FLOW DRAWER -->
+<div id="flow-drawer" class="flow-drawer">
+  <div class="drawer-header">
+    <span>Editar bloco</span>
+    <button class="drawer-close" onclick="closeFlowDrawer()"><i data-lucide="x" class="icon-lg"></i></button>
+  </div>
+  <div id="drawer-body"></div>
+</div>
+
+<!-- MODAL TIPO DE PERGUNTA -->
+<div class="modal-overlay" id="add-modal" onclick="if(event.target===this)closeAddModal()">
   <div class="modal">
-    <h3>Tipo de pergunta</h3>
-    <p class="modal-sub">Escolha como o respondente vai interagir:</p>
+    <h3>Adicionar pergunta</h3>
+    <p class="modal-sub">Escolha o tipo de interação:</p>
     <div class="type-picker-grid">
       <button class="type-picker-btn" onclick="addQuestion('multiple_choice')">
-        <span class="ti">🔘</span><span class="tl">Múltipla escolha</span><span class="td">Uma resposta</span>
+        <span class="ti"><i data-lucide="circle-dot" class="icon-xl"></i></span>
+        <span class="tl">Múltipla escolha</span><span class="td">Uma resposta</span>
       </button>
       <button class="type-picker-btn" onclick="addQuestion('checkbox')">
-        <span class="ti">☑️</span><span class="tl">Caixas de seleção</span><span class="td">Várias respostas</span>
+        <span class="ti"><i data-lucide="check-square" class="icon-xl"></i></span>
+        <span class="tl">Checkboxes</span><span class="td">Várias respostas</span>
       </button>
       <button class="type-picker-btn" onclick="addQuestion('text')">
-        <span class="ti">✏️</span><span class="tl">Texto livre</span><span class="td">Campo aberto</span>
+        <span class="ti"><i data-lucide="type" class="icon-xl"></i></span>
+        <span class="tl">Texto livre</span><span class="td">Campo aberto</span>
       </button>
       <button class="type-picker-btn" onclick="addQuestion('email')">
-        <span class="ti">📧</span><span class="tl">E-mail</span><span class="td">Captação</span>
+        <span class="ti"><i data-lucide="mail" class="icon-xl"></i></span>
+        <span class="tl">E-mail</span><span class="td">Captação</span>
       </button>
       <button class="type-picker-btn" onclick="addQuestion('phone')">
-        <span class="ti">📱</span><span class="tl">Telefone</span><span class="td">WhatsApp</span>
+        <span class="ti"><i data-lucide="smartphone" class="icon-xl"></i></span>
+        <span class="tl">Telefone</span><span class="td">WhatsApp</span>
       </button>
       <button class="type-picker-btn" onclick="addQuestion('name')">
-        <span class="ti">👤</span><span class="tl">Nome</span><span class="td">Captação</span>
+        <span class="ti"><i data-lucide="user" class="icon-xl"></i></span>
+        <span class="tl">Nome</span><span class="td">Captação</span>
       </button>
       <button class="type-picker-btn" onclick="addQuestion('rating')">
-        <span class="ti">⭐</span><span class="tl">Avaliação</span><span class="td">Estrelas 1–5</span>
+        <span class="ti"><i data-lucide="star" class="icon-xl"></i></span>
+        <span class="tl">Avaliação</span><span class="td">1 a 5 estrelas</span>
       </button>
       <button class="type-picker-btn" onclick="addQuestion('nps')">
-        <span class="ti">📊</span><span class="tl">NPS</span><span class="td">Escala 0–10</span>
+        <span class="ti"><i data-lucide="bar-chart-2" class="icon-xl"></i></span>
+        <span class="tl">NPS</span><span class="td">Escala 0–10</span>
       </button>
       <button class="type-picker-btn" onclick="addQuestion('statement')">
-        <span class="ti">💬</span><span class="tl">Apresentação</span><span class="td">Sem resposta</span>
+        <span class="ti"><i data-lucide="message-square" class="icon-xl"></i></span>
+        <span class="tl">Apresentação</span><span class="td">Sem resposta</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('video')">
+        <span class="ti"><i data-lucide="play-circle" class="icon-xl"></i></span>
+        <span class="tl">Vídeo</span><span class="td">Bloco standalone</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('video_question')">
+        <span class="ti"><i data-lucide="clapperboard" class="icon-xl"></i></span>
+        <span class="tl">Vídeo + Pergunta</span><span class="td">Vídeo com resposta</span>
+      </button>
+      <button class="type-picker-btn" onclick="addQuestion('picture_choice')">
+        <span class="ti"><i data-lucide="image" class="icon-xl"></i></span>
+        <span class="tl">Escolha por foto</span><span class="td">Opções com imagem</span>
       </button>
     </div>
   </div>
 </div>
 
 <script>
-  // ── State ──────────────────────────────────────────────────
-  let supabase   = null;
-  let currentUser= null;
-  let quizId     = null;
-  let quiz       = null;
-  let questions  = [];        // [{id, position, type, title, description, required, options:[{id,label,value}]}]
-  let activeIdx  = -1;
-  let saveTimer  = null;
-  let isMobile   = false;
+// ── State ──────────────────────────────────────────────────
+let sb = null, currentUser = null, quizId = null, quiz = null;
+let questions = [];
+let activeIdx = -1;
+let activeTab = 'question';
+let saveTimer = null;
 
-  const TYPE_LABELS = {
-    multiple_choice: 'Múltipla escolha',
-    checkbox: 'Caixas de seleção',
-    text: 'Texto livre',
-    email: 'E-mail',
-    phone: 'Telefone',
-    name: 'Nome',
-    rating: 'Avaliação',
-    nps: 'NPS',
-    statement: 'Apresentação',
-  };
+const TYPE_LABELS = {
+  multiple_choice:'Múltipla escolha', checkbox:'Checkboxes', text:'Texto livre',
+  email:'E-mail', phone:'Telefone', name:'Nome', rating:'Avaliação', nps:'NPS',
+  statement:'Apresentação', video:'Vídeo', video_question:'Vídeo + Pergunta',
+  picture_choice:'Escolha por foto'
+};
+const TYPE_ICONS = {
+  multiple_choice:'circle-dot', checkbox:'check-square', text:'type', email:'mail',
+  phone:'smartphone', name:'user', rating:'star', nps:'bar-chart-2',
+  statement:'message-square', video:'play-circle', video_question:'clapperboard',
+  picture_choice:'image'
+};
 
-  // ── Init ───────────────────────────────────────────────────
-  async function initSupabase() {
-    if (supabase) return supabase;
-    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-    supabase = createClient(window.__env?.SUPABASE_URL || '', window.__env?.SUPABASE_ANON_KEY || '');
-    return supabase;
+// ── Video helpers ──────────────────────────────────────────
+function parseVideoUrl(url) {
+  if (!url) return null;
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    const id = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)?.[1];
+    if (!id) return null;
+    return { type: 'youtube', embedUrl: `https://www.youtube.com/embed/${id}`, thumbUrl: `https://img.youtube.com/vi/${id}/0.jpg` };
   }
-
-  (async () => {
-    const sb = await initSupabase();
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) { window.location.href = '/'; return; }
-    currentUser = session.user;
-    quizId = new URLSearchParams(location.search).get('id');
-    if (!quizId) { window.location.href = '/dashboard.html'; return; }
-    await loadQuiz();
-  })();
-
-  async function loadQuiz() {
-    const sb = await initSupabase();
-    const { data: q, error: qe } = await sb.from('quizzes').select('*').eq('id', quizId).eq('user_id', currentUser.id).single();
-    if (qe || !q) { window.location.href = '/dashboard.html'; return; }
-    quiz = q;
-    document.getElementById('quiz-title-input').value = q.title;
-    updateStatusBtn();
-
-    const { data: qs } = await sb.from('questions').select('*, options(*)').eq('quiz_id', quizId).order('position');
-    questions = (qs || []).map(q => ({ ...q, options: (q.options || []).sort((a,b) => a.position - b.position) }));
-    renderSteps();
-    if (questions.length > 0) selectStep(0);
-    else renderEmptyPreview();
+  if (url.includes('vimeo.com')) {
+    const id = url.match(/vimeo\.com\/(\d+)/)?.[1];
+    if (!id) return null;
+    return { type: 'vimeo', embedUrl: `https://player.vimeo.com/video/${id}`, thumbUrl: null };
   }
+  if (url.match(/\.(mp4|webm|ogg)$/i)) {
+    return { type: 'direct', embedUrl: url, thumbUrl: null };
+  }
+  return null;
+}
 
-  // ── Render Steps ───────────────────────────────────────────
-  function renderSteps() {
-    const list = document.getElementById('steps-list');
-    if (!questions.length) {
-      list.innerHTML = `<div style="padding:24px 12px;text-align:center;color:var(--muted);font-size:13px">Nenhuma pergunta.<br>Clique em + para adicionar.</div>`;
-      return;
+// ── Theme ──────────────────────────────────────────────────
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('funnly-theme', isDark ? 'dark' : 'light');
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+  lucide.createIcons();
+}
+
+function initThemeIcon() {
+  const isDark = document.body.classList.contains('dark');
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+}
+
+// ── Init ───────────────────────────────────────────────────
+async function initSb() {
+  if (sb) return sb;
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+  sb = createClient(window.__env?.SUPABASE_URL||'', window.__env?.SUPABASE_ANON_KEY||'');
+  return sb;
+}
+
+(async () => {
+  const client = await initSb();
+  const { data:{ session } } = await client.auth.getSession();
+  if (!session) { location.href = '/'; return; }
+  currentUser = session.user;
+  quizId = new URLSearchParams(location.search).get('id');
+  if (!quizId) { location.href = '/dashboard.html'; return; }
+  await loadQuiz();
+  initThemeIcon();
+  lucide.createIcons();
+})();
+
+async function loadQuiz() {
+  const client = await initSb();
+  const { data:q, error } = await client.from('quizzes').select('*').eq('id',quizId).eq('user_id',currentUser.id).single();
+  if (error||!q) { location.href='/dashboard.html'; return; }
+  quiz = q;
+  document.getElementById('quiz-title-input').value = q.title;
+  updateStatusBtn();
+
+  const { data:qs } = await client.from('questions').select('*, options(*)').eq('quiz_id',quizId).order('position');
+  questions = (qs||[]).map(q=>({
+    ...q, _new:false,
+    options:(q.options||[]).sort((a,b)=>a.position-b.position),
+    // Restore video fields from settings
+    videoUrl: q.settings?.videoUrl ?? (q.type==='video'||q.type==='video_question' ? '' : undefined),
+    autoAdvance: q.settings?.autoAdvance ?? false,
+    autoAdvanceDelay: q.settings?.autoAdvanceDelay ?? 5,
+  }));
+  renderSteps();
+  if (questions.length) selectStep(0);
+}
+
+// ── Steps list ─────────────────────────────────────────────
+function renderSteps() {
+  const list = document.getElementById('steps-list');
+  if (!questions.length) {
+    list.innerHTML = `<div style="padding:24px 12px;text-align:center;color:var(--muted);font-size:13px;line-height:1.6">Nenhuma pergunta ainda.<br>Clique em <strong>+</strong> para adicionar.</div>`;
+    return;
+  }
+  list.innerHTML = questions.map((q,i) => `
+    <div class="step-item ${i===activeIdx?'active':''}" onclick="selectStep(${i})">
+      <div class="step-num">${i+1}</div>
+      <div class="step-text ${q.title?'':'empty'}">${q.title ? escHtml(q.title) : 'Sem título'}</div>
+      <span class="step-type-badge">${TYPE_LABELS[q.type]?.split(' ')[0]||q.type}</span>
+      <button class="step-del" onclick="deleteStep(event,${i})"><i data-lucide="trash-2" class="icon"></i></button>
+    </div>`).join('');
+  lucide.createIcons();
+}
+
+function selectStep(i) {
+  activeIdx = i;
+  activeTab = 'question';
+  renderSteps();
+  renderPreview();
+  renderPanel();
+}
+
+// ── Preview ────────────────────────────────────────────────
+function renderPreview() {
+  const q = questions[activeIdx];
+  const el = document.getElementById('device-preview');
+  if (!q) {
+    el.innerHTML = `<div class="preview-empty"><i data-lucide="layout-template" style="width:40px;height:40px;color:var(--muted)"></i><div>Adicione perguntas<br>para visualizar</div></div>`;
+    lucide.createIcons();
+    return;
+  }
+  let body = '';
+  if (q.type==='multiple_choice'||q.type==='checkbox') {
+    const opts = q.options?.length
+      ? q.options.map((o,i)=>`<div class="preview-option ${i===0?'first':''}">${o.emoji?o.emoji+' ':''}${escHtml(o.label||'Opção')}</div>`).join('')
+      : '<div class="preview-option first">Opção 1</div><div class="preview-option">Opção 2</div>';
+    body = `<div class="preview-options">${opts}</div>`;
+  } else if (q.type==='picture_choice') {
+    const picOpts = q.options?.length
+      ? q.options.map((o,i) => `<div class="preview-pic-opt ${i===0?'first':''}">
+          ${o.imageUrl ? `<img src="${escAttr(o.imageUrl)}" alt="">` : `<div class="preview-pic-placeholder"><i data-lucide="image" style="width:24px;height:24px;opacity:.4"></i></div>`}
+          <span>${escHtml(o.label||'Opção')}</span>
+        </div>`).join('')
+      : `<div class="preview-pic-opt first"><div class="preview-pic-placeholder"><i data-lucide="image" style="width:24px;height:24px;opacity:.4"></i></div><span>Opção 1</span></div>
+         <div class="preview-pic-opt"><div class="preview-pic-placeholder"><i data-lucide="image" style="width:24px;height:24px;opacity:.4"></i></div><span>Opção 2</span></div>`;
+    body = `<div class="preview-pic-grid">${picOpts}</div>`;
+  } else if (['text','email','phone','name'].includes(q.type)) {
+    const ph={text:'Sua resposta...',email:'seu@email.com',phone:'(11) 9 9999-9999',name:'Seu nome...'};
+    body = `<input class="preview-input-mock" placeholder="${ph[q.type]}" disabled>`;
+  } else if (q.type==='rating') {
+    const stars = Array.from({length:5},(_,i)=>`<svg viewBox="0 0 24 24" fill="${i<3?'currentColor':'none'}" stroke="currentColor" stroke-width="1.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>`).join('');
+    body = `<div class="preview-stars">${stars}</div>`;
+  } else if (q.type==='nps') {
+    body = `<div class="preview-nps">${Array.from({length:11},(_,i)=>`<div class="preview-nps-btn">${i}</div>`).join('')}</div>`;
+  } else if (q.type==='video' || q.type==='video_question') {
+    const parsed = parseVideoUrl(q.videoUrl||'');
+    let playerHtml;
+    if (parsed?.thumbUrl) {
+      playerHtml = `<img src="${escAttr(parsed.thumbUrl)}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:12px" alt="thumbnail">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);border-radius:12px">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>`;
+    } else if (parsed?.type === 'direct') {
+      playerHtml = `<video src="${escAttr(parsed.embedUrl)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px"></video>`;
+    } else {
+      playerHtml = `<div class="video-placeholder"><i data-lucide="play-circle" style="width:40px;height:40px;opacity:.4"></i><span>${q.videoUrl?'Pré-visualização indisponível':'Cole uma URL de vídeo'}</span></div>`;
     }
-    list.innerHTML = questions.map((q, i) => `
-      <div class="step-item ${i === activeIdx ? 'active' : ''}" onclick="selectStep(${i})">
-        <div class="step-num">${i+1}</div>
-        <div class="step-text">${escHtml(q.title || 'Sem título')}</div>
-        <span class="step-type-badge">${TYPE_LABELS[q.type]?.split(' ')[0] || q.type}</span>
-        <button class="step-del" onclick="deleteStep(event,${i})" title="Remover">×</button>
-      </div>`).join('');
-  }
-
-  // ── Select / Edit Step ─────────────────────────────────────
-  function selectStep(i) {
-    activeIdx = i;
-    renderSteps();
-    renderPreview();
-    renderEditPanel();
-  }
-
-  // ── Preview ────────────────────────────────────────────────
-  function renderPreview() {
-    const q = questions[activeIdx];
-    if (!q) { renderEmptyPreview(); return; }
-    const preview = document.getElementById('device-preview');
-    let content = '';
-    if (q.type === 'multiple_choice' || q.type === 'checkbox') {
-      const opts = q.options?.length
-        ? q.options.map((o,i) => `<div class="preview-option">${o.emoji ? o.emoji + ' ' : ''}${escHtml(o.label)}</div>`).join('')
-        : '<div class="preview-option">Opção 1</div><div class="preview-option">Opção 2</div>';
-      content = `<div class="preview-options">${opts}</div>`;
-    } else if (['text','email','phone','name'].includes(q.type)) {
-      const ph = { text: 'Digite sua resposta...', email: 'seu@email.com', phone: '(11) 9 9999-9999', name: 'Seu nome...' };
-      content = `<input class="preview-input-mock" placeholder="${ph[q.type]}" readonly>`;
-    } else if (q.type === 'rating') {
-      content = `<div style="display:flex;gap:8px;font-size:28px">⭐⭐⭐⭐⭐</div>`;
-    } else if (q.type === 'nps') {
-      content = `<div style="display:flex;gap:6px;flex-wrap:wrap">${Array.from({length:11},(_,i)=>`<div style="width:36px;height:36px;border-radius:8px;background:var(--paper);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">${i}</div>`).join('')}</div>`;
-    } else if (q.type === 'statement') {
-      content = `<button class="preview-btn-mock">Continuar →</button>`;
+    body = `<div class="video-preview-wrap">${playerHtml}</div>`;
+    if (q.type==='video_question' && q.options?.length) {
+      const subOpts = q.options.map((o,i)=>`<div class="preview-option ${i===0?'first':''}">${o.emoji?o.emoji+' ':''}${escHtml(o.label||'Opção')}</div>`).join('');
+      body += `<div class="preview-options">${subOpts}</div>`;
     }
-    preview.innerHTML = `
-      <div class="preview-question-type">${TYPE_LABELS[q.type] || q.type}</div>
-      <div class="preview-title">${escHtml(q.title || 'Título da pergunta')}</div>
-      ${q.description ? `<div class="preview-desc">${escHtml(q.description)}</div>` : ''}
-      ${content}
-      ${q.type !== 'statement' ? '<button class="preview-btn-mock">Próximo →</button>' : ''}
-    `;
   }
+  const btnLabel = (q.type==='statement'||q.type==='video') ? 'Continuar →' : 'Próximo →';
+  const s = quiz?.settings || {};
+  const sizeMap = { sm: '10px 18px', md: '14px 28px', lg: '18px 40px' };
+  const shapeMap = { square: '6px', rounded: '12px', pill: '999px' };
+  const btnPad = sizeMap[s.ctaSize||'md'];
+  const btnRadius = shapeMap[s.ctaShape||'rounded'];
+  const btnColor = s.ctaColor || '#fb923c';
+  el.innerHTML = `
+    <div class="preview-type-label">${TYPE_LABELS[q.type]||q.type}</div>
+    ${(q.type!=='video')?`<div class="preview-title">${escHtml(q.title||'Título da pergunta')}</div>`:q.title?`<div class="preview-title">${escHtml(q.title)}</div>`:''}
+    ${q.description?`<div class="preview-desc">${escHtml(q.description)}</div>`:''}
+    ${body}
+    <button class="preview-btn" style="background:${btnColor};padding:${btnPad};border-radius:${btnRadius}">${btnLabel}</button>
+  `;
+  lucide.createIcons();
+}
 
-  function renderEmptyPreview() {
-    document.getElementById('device-preview').innerHTML = `
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);text-align:center;gap:12px">
-        <div style="font-size:40px">📋</div>
-        <div style="font-size:14px">Adicione perguntas na lista<br>para visualizar aqui.</div>
-      </div>`;
+// ── Edit Panel ─────────────────────────────────────────────
+function renderPanel() {
+  const panel = document.getElementById('edit-panel');
+  const q = questions[activeIdx];
+  if (!q) { panel.innerHTML = `<div class="panel-empty">Selecione uma pergunta<br>para editar.</div>`; return; }
+
+  panel.innerHTML = `
+    <div class="panel-tabs">
+      <button class="panel-tab ${activeTab==='question'?'active':''}" onclick="switchTab('question')">Pergunta</button>
+      <button class="panel-tab ${activeTab==='config'?'active':''}" onclick="switchTab('config')">Configurações</button>
+    </div>
+    <div class="panel-body" id="panel-body">
+      ${activeTab==='question' ? renderQuestionTab(q) : renderConfigTab()}
+    </div>
+  `;
+  attachPanelListeners(q);
+  lucide.createIcons();
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  if (builderMode === 'flow' && flowDrawerIdx >= 0) {
+    const q = questions[flowDrawerIdx];
+    const body = document.getElementById('panel-body');
+    if (body) {
+      // Update tab active states
+      document.querySelectorAll('.panel-tab').forEach(t => {
+        t.classList.toggle('active', t.textContent.toLowerCase().includes(tab==='question'?'perg':'config'));
+      });
+      body.innerHTML = tab==='question' ? renderQuestionTab(q) : renderConfigTab();
+      attachPanelListeners(q);
+      lucide.createIcons();
+    }
+  } else {
+    renderPanel();
   }
+}
 
-  // ── Edit Panel ─────────────────────────────────────────────
-  function renderEditPanel() {
-    const q = questions[activeIdx];
-    if (!q) { document.getElementById('edit-panel').innerHTML = `<div class="empty-panel"><p>Selecione uma pergunta.</p></div>`; return; }
-    const hasOptions = q.type === 'multiple_choice' || q.type === 'checkbox';
-    const optionsHtml = hasOptions ? `
+function renderQuestionTab(q) {
+  // ── Video types ──
+  if (q.type==='video' || q.type==='video_question') {
+    const isVQ = q.type==='video_question';
+    const parsed = parseVideoUrl(q.videoUrl||'');
+    const previewHtml = parsed?.thumbUrl
+      ? `<div class="video-preview-wrap" style="margin-bottom:12px"><img src="${escAttr(parsed.thumbUrl)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px"></div>`
+      : parsed?.type==='direct'
+        ? `<div class="video-preview-wrap" style="margin-bottom:12px"><video src="${escAttr(parsed.embedUrl)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px"></video></div>`
+        : '';
+    const subOpts = isVQ ? `
       <div class="panel-section">
-        <div class="panel-label">Opções</div>
+        <div class="section-label">Pergunta</div>
+        <div class="field">
+          <label>Texto da pergunta</label>
+          <input type="text" id="field-title" value="${escAttr(q.title||'')}" placeholder="Ex: O que você achou?">
+        </div>
+        <div class="section-label" style="margin-top:12px">Opções</div>
         <div class="options-list" id="options-list">
-          ${(q.options||[]).map((o,i) => `
-            <div class="option-row" data-i="${i}">
-              <span style="font-size:16px;cursor:pointer" onclick="toggleEmoji(${i})">${o.emoji || '➕'}</span>
-              <input value="${escHtml(o.label)}" placeholder="Opção ${i+1}" oninput="updateOption(${i},'label',this.value)">
-              <button class="option-del" onclick="deleteOption(${i})">×</button>
+          ${(q.options||[]).map((o,i)=>`
+            <div class="option-row">
+              <span class="option-emoji" data-i="${i}" title="Trocar emoji">${o.emoji||'·'}</span>
+              <input class="option-input" data-i="${i}" value="${escAttr(o.label)}" placeholder="Opção ${i+1}">
+              <button class="option-del" data-i="${i}"><i data-lucide="trash-2" class="icon"></i></button>
             </div>`).join('')}
         </div>
-        <button class="add-option-btn" onclick="addOption()">+ Adicionar opção</button>
+        <button class="add-option-btn" id="add-opt-btn">
+          <i data-lucide="plus" class="icon"></i> Adicionar opção
+        </button>
       </div>` : '';
-
-    document.getElementById('edit-panel').innerHTML = `
-      <!-- TIPO -->
+    return `
       <div class="panel-section">
-        <div class="panel-label">Tipo</div>
-        <div class="type-grid">
-          ${Object.entries(TYPE_LABELS).map(([k,v]) => `
-            <button class="type-btn ${q.type===k?'active':''}" onclick="changeType('${k}')">
-              <span class="type-icon">${typeIcon(k)}</span>
-              <span style="font-size:11px">${v.split(' ')[0]}</span>
-            </button>`).join('')}
-        </div>
-      </div>
-      <!-- CONTEÚDO -->
-      <div class="panel-section">
-        <div class="panel-label">Conteúdo</div>
+        <div class="section-label">Vídeo</div>
+        ${previewHtml}
         <div class="field">
-          <label>Pergunta</label>
-          <input type="text" value="${escHtml(q.title||'')}" oninput="updateField('title',this.value)" placeholder="Qual sua dúvida?">
+          <label>URL do vídeo</label>
+          <input type="url" id="video-url" value="${escAttr(q.videoUrl||'')}" placeholder="YouTube, Vimeo ou MP4...">
+          <div class="field-hint">Cole o link e clique fora para ver o preview.</div>
         </div>
         <div class="field">
-          <label>Descrição (opcional)</label>
-          <textarea rows="2" oninput="updateField('description',this.value)" placeholder="Contexto adicional...">${escHtml(q.description||'')}</textarea>
+          <label>Legenda <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+          <input type="text" id="field-title" value="${escAttr(q.title||'')}" placeholder="Texto acima do vídeo..." ${isVQ?'style="display:none"':''}>
         </div>
       </div>
-      <!-- OPÇÕES -->
-      ${optionsHtml}
-      <!-- CONFIG -->
       <div class="panel-section">
-        <div class="panel-label">Configurações</div>
+        <div class="section-label">Comportamento</div>
+        <div class="toggle-row" style="margin-bottom:10px">
+          <label>Avançar automaticamente</label>
+          <button class="toggle ${q.autoAdvance?'on':''}" id="toggle-auto-advance"></button>
+        </div>
+        <div class="field" id="advance-delay-field" style="${q.autoAdvance?'':'display:none'}">
+          <label>Após quantos segundos</label>
+          <input type="number" id="advance-delay" value="${q.autoAdvanceDelay||5}" min="1" max="120">
+        </div>
+      </div>
+      ${subOpts}
+      <div class="panel-section">
+        <div class="section-label">Validação</div>
         <div class="toggle-row">
-          <label style="font-size:13px">Resposta obrigatória</label>
-          <button class="toggle ${q.required?'on':''}" onclick="toggleRequired()"></button>
+          <label>Resposta obrigatória</label>
+          <button class="toggle ${q.required?'on':''}" id="toggle-required"></button>
         </div>
       </div>
     `;
   }
 
-  // ── Field updates ──────────────────────────────────────────
-  function updateField(key, value) {
-    questions[activeIdx][key] = value;
-    renderPreview();
-    debounceSave();
+  const hasOpts = q.type==='multiple_choice'||q.type==='checkbox';
+  const opts = hasOpts ? `
+    <div class="panel-section">
+      <div class="section-label">Opções</div>
+      <div class="options-list" id="options-list">
+        ${(q.options||[]).map((o,i)=>`
+          <div class="option-row">
+            <span class="option-emoji" data-i="${i}" title="Trocar emoji">${o.emoji||'·'}</span>
+            <input class="option-input" data-i="${i}" value="${escAttr(o.label)}" placeholder="Opção ${i+1}">
+            <button class="option-del" data-i="${i}"><i data-lucide="trash-2" class="icon"></i></button>
+          </div>`).join('')}
+      </div>
+      <button class="add-option-btn" id="add-opt-btn">
+        <i data-lucide="plus" class="icon"></i> Adicionar opção
+      </button>
+    </div>` : '';
+
+  const hasPicOpts = q.type==='picture_choice';
+  const picOpts = hasPicOpts ? `
+    <div class="panel-section">
+      <div class="section-label">Opções com foto</div>
+      <div class="pic-opts-list" id="pic-opts-list">
+        ${(q.options||[]).map((o,i)=>`
+          <div class="pic-opt-row" data-i="${i}">
+            <div class="pic-opt-thumb" onclick="document.getElementById('pic-url-${i}').focus()">
+              ${o.imageUrl ? `<img src="${escAttr(o.imageUrl)}" alt="">` : `<i data-lucide="image" style="opacity:.4"></i>`}
+            </div>
+            <div class="pic-opt-fields">
+              <input class="pic-opt-label" data-i="${i}" value="${escAttr(o.label||'')}" placeholder="Texto da opção">
+              <input class="pic-opt-url" id="pic-url-${i}" data-i="${i}" value="${escAttr(o.imageUrl||'')}" placeholder="URL da imagem (https://...)">
+            </div>
+            <button class="option-del" data-i="${i}" data-pic="1"><i data-lucide="trash-2" class="icon"></i></button>
+          </div>`).join('')}
+      </div>
+      <button class="add-option-btn" id="add-pic-opt-btn">
+        <i data-lucide="plus" class="icon"></i> Adicionar opção
+      </button>
+    </div>` : '';
+
+  return `
+    <div class="panel-section">
+      <div class="section-label">Tipo</div>
+      <div class="type-grid">
+        ${Object.entries(TYPE_LABELS).map(([k,v])=>`
+          <button class="type-btn ${q.type===k?'active':''}" data-type="${k}">
+            <i data-lucide="${TYPE_ICONS[k]}" class="icon-lg"></i>
+            <span>${v.split(' ')[0]}</span>
+          </button>`).join('')}
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="section-label">Conteúdo</div>
+      <div class="field">
+        <label>Pergunta</label>
+        <input type="text" id="field-title" value="${escAttr(q.title||'')}" placeholder="Ex: Qual é o seu objetivo?">
+      </div>
+      <div class="field">
+        <label>Descrição <span style="font-weight:400;color:var(--muted)">(opcional)</span></label>
+        <textarea id="field-desc" rows="2" placeholder="Contexto adicional...">${escHtml(q.description||'')}</textarea>
+      </div>
+    </div>
+    ${opts}
+    ${picOpts}
+    <div class="panel-section">
+      <div class="section-label">Validação</div>
+      <div class="toggle-row">
+        <label>Resposta obrigatória</label>
+        <button class="toggle ${q.required?'on':''}" id="toggle-required"></button>
+      </div>
+    </div>
+  `;
+}
+
+function renderConfigTab() {
+  const s = quiz?.settings||{};
+  return `
+    <div class="panel-section">
+      <div class="section-label">Após conclusão</div>
+      <div class="field">
+        <label>Mensagem de sucesso</label>
+        <textarea id="cfg-msg" rows="3" placeholder="Suas respostas foram registradas!">${escHtml(s.successMessage||'')}</textarea>
+      </div>
+      <div class="field">
+        <label>Redirecionar para (URL)</label>
+        <input type="url" id="cfg-redirect" value="${escAttr(s.redirectUrl||'')}" placeholder="https://seusite.com/obrigado">
+        <div class="field-hint">Redireciona 3s após a conclusão.</div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="section-label">Aparência</div>
+      <div class="field">
+        <label>Cor principal</label>
+        <div class="color-row">
+          <input type="color" id="cfg-color-pick" value="${escAttr(s.primaryColor||'#a855f7')}">
+          <input type="text" id="cfg-color-text" value="${escAttr(s.primaryColor||'#a855f7')}" placeholder="#a855f7">
+        </div>
+      </div>
+      <div class="field">
+        <label>Cor dos botões CTA</label>
+        <div class="color-row">
+          <input type="color" id="cfg-cta-pick" value="${escAttr(s.ctaColor||'#fb923c')}">
+          <input type="text" id="cfg-cta-text" value="${escAttr(s.ctaColor||'#fb923c')}" placeholder="#fb923c">
+        </div>
+      </div>
+      <div class="field">
+        <label>Tamanho do botão</label>
+        <div class="btn-size-row">
+          ${['sm','md','lg'].map(sz => `<button class="btn-size-opt${(s.ctaSize||'md')===sz?' active':''}" data-size="${sz}" onclick="setCfgBtnSize('${sz}')">${{sm:'Pequeno',md:'Médio',lg:'Grande'}[sz]}</button>`).join('')}
+        </div>
+      </div>
+      <div class="field">
+        <label>Formato do botão</label>
+        <div class="btn-size-row">
+          <button class="btn-shape-opt${(s.ctaShape||'rounded')==='square'?' active':''}" data-shape="square" onclick="setCfgBtnShape('square')" style="border-radius:4px">Quadrado</button>
+          <button class="btn-shape-opt${(s.ctaShape||'rounded')==='rounded'?' active':''}" data-shape="rounded" onclick="setCfgBtnShape('rounded')" style="border-radius:10px">Arredondado</button>
+          <button class="btn-shape-opt${(s.ctaShape||'rounded')==='pill'?' active':''}" data-shape="pill" onclick="setCfgBtnShape('pill')" style="border-radius:999px">Pílula</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="section-label">Branding</div>
+      <div class="toggle-row">
+        <label>Mostrar "Criado com funnly"</label>
+        <button class="toggle ${s.showBranding!==false?'on':''}" id="toggle-branding"></button>
+      </div>
+    </div>
+  `;
+}
+
+// ── Attach listeners ───────────────────────────────────────
+function attachPanelListeners(q) {
+  // Video URL field
+  const videoUrlEl = document.getElementById('video-url');
+  if (videoUrlEl) {
+    videoUrlEl.addEventListener('blur', () => {
+      questions[activeIdx].videoUrl = videoUrlEl.value.trim();
+      renderPreview(); renderPanel(); debounceSave();
+    });
+    videoUrlEl.addEventListener('keydown', e => { if (e.key === 'Enter') videoUrlEl.blur(); });
   }
 
-  function changeType(type) {
-    questions[activeIdx].type = type;
-    if ((type === 'multiple_choice' || type === 'checkbox') && !questions[activeIdx].options?.length) {
-      questions[activeIdx].options = [
-        { id: tmpId(), label: 'Opção 1', value: 'opcao-1', emoji: '', position: 0 },
-        { id: tmpId(), label: 'Opção 2', value: 'opcao-2', emoji: '', position: 1 },
-      ];
-    }
-    renderEditPanel(); renderPreview(); debounceSave();
+  // Auto-advance toggle
+  const autoAdvToggle = document.getElementById('toggle-auto-advance');
+  if (autoAdvToggle) {
+    autoAdvToggle.addEventListener('click', () => {
+      questions[activeIdx].autoAdvance = !questions[activeIdx].autoAdvance;
+      autoAdvToggle.classList.toggle('on', questions[activeIdx].autoAdvance);
+      const delayField = document.getElementById('advance-delay-field');
+      if (delayField) delayField.style.display = questions[activeIdx].autoAdvance ? '' : 'none';
+      debounceSave();
+    });
   }
 
-  function toggleRequired() {
-    questions[activeIdx].required = !questions[activeIdx].required;
-    renderEditPanel(); debounceSave();
+  // Auto-advance delay input
+  const advDelayEl = document.getElementById('advance-delay');
+  if (advDelayEl) {
+    advDelayEl.addEventListener('input', () => {
+      questions[activeIdx].autoAdvanceDelay = parseInt(advDelayEl.value)||5;
+      debounceSave();
+    });
   }
 
-  // ── Options ────────────────────────────────────────────────
-  function addOption() {
-    const i = (questions[activeIdx].options||[]).length;
-    if (!questions[activeIdx].options) questions[activeIdx].options = [];
-    questions[activeIdx].options.push({ id: tmpId(), label: `Opção ${i+1}`, value: `opcao-${i+1}`, emoji: '', position: i });
-    renderEditPanel(); renderPreview(); debounceSave();
+  const titleEl = document.getElementById('field-title');
+  if (titleEl) {
+    titleEl.addEventListener('input', () => {
+      questions[activeIdx].title = titleEl.value;
+      renderPreview();
+      updateStepLabel(activeIdx);
+      debounceSave();
+    });
   }
 
-  function deleteOption(i) {
-    questions[activeIdx].options.splice(i, 1);
-    questions[activeIdx].options.forEach((o,j) => o.position = j);
-    renderEditPanel(); renderPreview(); debounceSave();
+  const descEl = document.getElementById('field-desc');
+  if (descEl) {
+    descEl.addEventListener('input', () => {
+      questions[activeIdx].description = descEl.value;
+      renderPreview();
+      debounceSave();
+    });
   }
 
-  function updateOption(i, key, value) {
-    questions[activeIdx].options[i][key] = value;
-    if (key === 'label') questions[activeIdx].options[i].value = value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-    renderPreview(); debounceSave();
-  }
-
-  function toggleEmoji(i) {
-    const emojis = ['😊','🔥','⭐','✅','❌','🎯','💡','🚀','❤️','😮','😢','👍','👎',''];
-    const cur = questions[activeIdx].options[i].emoji || '';
-    const next = emojis[(emojis.indexOf(cur) + 1) % emojis.length];
-    questions[activeIdx].options[i].emoji = next;
-    renderEditPanel(); renderPreview(); debounceSave();
-  }
-
-  // ── Add / Delete step ──────────────────────────────────────
-  function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
-  function closeAddOutside(e) { if (e.target.id === 'add-modal') document.getElementById('add-modal').classList.remove('open'); }
-
-  function addQuestion(type) {
-    document.getElementById('add-modal').classList.remove('open');
-    const q = {
-      id: tmpId(), quiz_id: quizId, position: questions.length,
-      type, title: '', description: '', required: true,
-      options: (type === 'multiple_choice' || type === 'checkbox')
-        ? [{ id: tmpId(), label: 'Opção 1', value: 'opcao-1', emoji: '', position: 0 }]
-        : [],
-      _new: true,
-    };
-    questions.push(q);
-    selectStep(questions.length - 1);
-    debounceSave();
-  }
-
-  function deleteStep(event, i) {
-    event.stopPropagation();
-    if (!confirm('Remover esta pergunta?')) return;
-    questions.splice(i, 1);
-    questions.forEach((q,j) => q.position = j);
-    if (activeIdx >= questions.length) activeIdx = questions.length - 1;
-    renderSteps();
-    if (activeIdx >= 0) selectStep(activeIdx);
-    else renderEmptyPreview();
-    debounceSave();
-  }
-
-  // ── Save ───────────────────────────────────────────────────
-  function debounceSave() {
-    document.getElementById('save-indicator').textContent = '● não salvo';
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveAll, 2000);
-  }
-
-  async function saveAll() {
-    clearTimeout(saveTimer);
-    document.getElementById('save-indicator').textContent = 'Salvando...';
-    const sb = await initSupabase();
-    const newTitle = document.getElementById('quiz-title-input').value.trim() || quiz.title;
-
-    // Save quiz title
-    await sb.from('quizzes').update({ title: newTitle }).eq('id', quizId);
-
-    // Upsert questions + options
-    for (const q of questions) {
-      const isNew = q._new || !q.id.includes('-');
-      const payload = { quiz_id: quizId, position: q.position, type: q.type, title: q.title, description: q.description, required: q.required, settings: {} };
-      let qId = q.id;
-      if (isNew) {
-        const { data } = await sb.from('questions').insert(payload).select().single();
-        if (data) { q.id = data.id; q._new = false; qId = data.id; }
-      } else {
-        await sb.from('questions').update(payload).eq('id', qId);
+  document.querySelectorAll('.type-btn[data-type]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.type;
+      questions[activeIdx].type = type;
+      if ((type==='multiple_choice'||type==='checkbox') && !questions[activeIdx].options?.length) {
+        questions[activeIdx].options = [
+          {id:tmpId(),label:'Opção 1',value:'opcao-1',emoji:'',position:0},
+          {id:tmpId(),label:'Opção 2',value:'opcao-2',emoji:'',position:1},
+        ];
       }
-      // Sync options: delete all then re-insert
-      if (q.options?.length >= 0) {
-        await sb.from('options').delete().eq('question_id', qId);
-        if (q.options.length) {
-          await sb.from('options').insert(q.options.map((o,i) => ({ question_id: qId, position: i, label: o.label, value: o.value, emoji: o.emoji || null })));
+      renderPreview(); renderPanel(); debounceSave();
+    });
+  });
+
+  const reqToggle = document.getElementById('toggle-required');
+  if (reqToggle) {
+    reqToggle.addEventListener('click', () => {
+      questions[activeIdx].required = !questions[activeIdx].required;
+      reqToggle.classList.toggle('on', questions[activeIdx].required);
+      debounceSave();
+    });
+  }
+
+  const optList = document.getElementById('options-list');
+  if (optList) {
+    optList.addEventListener('input', e => {
+      const inp = e.target.closest('.option-input');
+      if (!inp) return;
+      const i = +inp.dataset.i;
+      questions[activeIdx].options[i].label = inp.value;
+      questions[activeIdx].options[i].value = inp.value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+      renderPreview(); debounceSave();
+    });
+    optList.addEventListener('click', e => {
+      const del = e.target.closest('.option-del');
+      if (!del) return;
+      const i = +del.dataset.i;
+      questions[activeIdx].options.splice(i,1);
+      questions[activeIdx].options.forEach((o,j)=>o.position=j);
+      renderPreview(); renderPanel(); debounceSave();
+    });
+    optList.addEventListener('click', e => {
+      const em = e.target.closest('.option-emoji');
+      if (!em) return;
+      const i = +em.dataset.i;
+      const emojis = ['😊','🔥','⭐','✅','❌','🎯','💡','🚀','❤️','👍','👎',''];
+      const cur = questions[activeIdx].options[i].emoji||'';
+      questions[activeIdx].options[i].emoji = emojis[(emojis.indexOf(cur)+1)%emojis.length];
+      renderPreview(); renderPanel(); debounceSave();
+    });
+  }
+
+  const addOptBtn = document.getElementById('add-opt-btn');
+  if (addOptBtn) {
+    addOptBtn.addEventListener('click', () => {
+      const i = (questions[activeIdx].options||[]).length;
+      if (!questions[activeIdx].options) questions[activeIdx].options=[];
+      questions[activeIdx].options.push({id:tmpId(),label:`Opção ${i+1}`,value:`opcao-${i+1}`,emoji:'',position:i});
+      renderPreview(); renderPanel(); debounceSave();
+    });
+  }
+
+  // Picture choice listeners
+  const picOptList = document.getElementById('pic-opts-list');
+  if (picOptList) {
+    picOptList.addEventListener('input', e => {
+      const labelInp = e.target.closest('.pic-opt-label');
+      const urlInp = e.target.closest('.pic-opt-url');
+      if (labelInp) {
+        const i = +labelInp.dataset.i;
+        questions[activeIdx].options[i].label = labelInp.value;
+        questions[activeIdx].options[i].value = labelInp.value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+        renderPreview(); debounceSave();
+      }
+      if (urlInp) {
+        const i = +urlInp.dataset.i;
+        questions[activeIdx].options[i].imageUrl = urlInp.value.trim();
+        // Update thumbnail live without full re-render
+        const thumb = picOptList.querySelector(`.pic-opt-row[data-i="${i}"] .pic-opt-thumb`);
+        if (thumb) {
+          const url = urlInp.value.trim();
+          thumb.innerHTML = url ? `<img src="${escAttr(url)}" alt="">` : `<i data-lucide="image" style="opacity:.4"></i>`;
+          lucide.createIcons();
+        }
+        renderPreview(); debounceSave();
+      }
+    });
+    picOptList.addEventListener('click', e => {
+      const del = e.target.closest('.option-del[data-pic]');
+      if (!del) return;
+      const i = +del.dataset.i;
+      questions[activeIdx].options.splice(i, 1);
+      questions[activeIdx].options.forEach((o,j) => o.position = j);
+      renderPreview(); renderPanel(); debounceSave();
+    });
+  }
+
+  const addPicOptBtn = document.getElementById('add-pic-opt-btn');
+  if (addPicOptBtn) {
+    addPicOptBtn.addEventListener('click', () => {
+      const i = (questions[activeIdx].options||[]).length;
+      if (!questions[activeIdx].options) questions[activeIdx].options = [];
+      questions[activeIdx].options.push({id:tmpId(), label:`Opção ${i+1}`, value:`opcao-${i+1}`, imageUrl:'', position:i});
+      renderPreview(); renderPanel(); debounceSave();
+    });
+  }
+
+  const cfgMsg = document.getElementById('cfg-msg');
+  if (cfgMsg) cfgMsg.addEventListener('input', ()=>{ if(!quiz.settings)quiz.settings={}; quiz.settings.successMessage=cfgMsg.value; debounceSave(); });
+
+  const cfgRedirect = document.getElementById('cfg-redirect');
+  if (cfgRedirect) cfgRedirect.addEventListener('input', ()=>{ if(!quiz.settings)quiz.settings={}; quiz.settings.redirectUrl=cfgRedirect.value; debounceSave(); });
+
+  const cfgColorPick = document.getElementById('cfg-color-pick');
+  const cfgColorText = document.getElementById('cfg-color-text');
+  if (cfgColorPick) {
+    cfgColorPick.addEventListener('input', ()=>{ cfgColorText.value=cfgColorPick.value; if(!quiz.settings)quiz.settings={}; quiz.settings.primaryColor=cfgColorPick.value; debounceSave(); });
+    cfgColorText.addEventListener('input', ()=>{ if(/^#[0-9a-fA-F]{6}$/.test(cfgColorText.value)){ cfgColorPick.value=cfgColorText.value; if(!quiz.settings)quiz.settings={}; quiz.settings.primaryColor=cfgColorText.value; debounceSave(); } });
+  }
+
+  const cfgCtaPick = document.getElementById('cfg-cta-pick');
+  const cfgCtaText = document.getElementById('cfg-cta-text');
+  if (cfgCtaPick) {
+    cfgCtaPick.addEventListener('input', ()=>{ cfgCtaText.value=cfgCtaPick.value; if(!quiz.settings)quiz.settings={}; quiz.settings.ctaColor=cfgCtaPick.value; debounceSave(); });
+    cfgCtaText.addEventListener('input', ()=>{ if(/^#[0-9a-fA-F]{6}$/.test(cfgCtaText.value)){ cfgCtaPick.value=cfgCtaText.value; if(!quiz.settings)quiz.settings={}; quiz.settings.ctaColor=cfgCtaText.value; debounceSave(); } });
+  }
+
+  const brandToggle = document.getElementById('toggle-branding');
+  if (brandToggle) {
+    brandToggle.addEventListener('click', ()=>{ if(!quiz.settings)quiz.settings={}; quiz.settings.showBranding=quiz.settings.showBranding===false?true:false; brandToggle.classList.toggle('on',quiz.settings.showBranding!==false); debounceSave(); });
+  }
+}
+
+function setCfgBtnSize(sz) {
+  if (!quiz.settings) quiz.settings = {};
+  quiz.settings.ctaSize = sz;
+  document.querySelectorAll('.btn-size-opt').forEach(b => b.classList.toggle('active', b.dataset.size === sz));
+  renderPreview(); debounceSave();
+}
+
+function setCfgBtnShape(shape) {
+  if (!quiz.settings) quiz.settings = {};
+  quiz.settings.ctaShape = shape;
+  document.querySelectorAll('.btn-shape-opt').forEach(b => b.classList.toggle('active', b.dataset.shape === shape));
+  renderPreview(); debounceSave();
+}
+
+function updateStepLabel(i) {
+  const items = document.querySelectorAll('.step-item');
+  if (!items[i]) return;
+  const textEl = items[i].querySelector('.step-text');
+  if (!textEl) return;
+  const title = questions[i].title;
+  textEl.textContent = title || 'Sem título';
+  textEl.classList.toggle('empty', !title);
+}
+
+// ── Add / Delete step ──────────────────────────────────────
+function openAddModal() { document.getElementById('add-modal').classList.add('open'); lucide.createIcons(); }
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+
+function addQuestion(type) {
+  closeAddModal();
+  const isVideo = type==='video'||type==='video_question';
+  const q = {
+    id: tmpId(), quiz_id: quizId, position: questions.length,
+    type, title: '', description: '', required: !isVideo, _new: true,
+    options: (type==='multiple_choice'||type==='checkbox'||type==='video_question')
+      ? [{id:tmpId(),label:'Opção 1',value:'opcao-1',emoji:'',position:0},{id:tmpId(),label:'Opção 2',value:'opcao-2',emoji:'',position:1}]
+      : type==='picture_choice'
+        ? [{id:tmpId(),label:'Opção 1',value:'opcao-1',imageUrl:'',position:0},{id:tmpId(),label:'Opção 2',value:'opcao-2',imageUrl:'',position:1}]
+        : [],
+    ...(isVideo && { videoUrl: '', autoAdvance: false, autoAdvanceDelay: 5 }),
+  };
+  questions.push(q);
+  activeTab = 'question';
+  activeIdx = questions.length - 1;
+  renderSteps();
+  renderPreview();
+  renderPanel();
+  debounceSave();
+  setTimeout(()=>{ document.getElementById('field-title')?.focus(); }, 50);
+}
+
+function deleteStep(e, i) {
+  e.stopPropagation();
+  if (!confirm('Remover esta pergunta?')) return;
+  questions.splice(i,1);
+  questions.forEach((q,j)=>q.position=j);
+  if (activeIdx>=questions.length) activeIdx=questions.length-1;
+  renderSteps();
+  if (activeIdx>=0) { renderPreview(); renderPanel(); }
+  else {
+    document.getElementById('device-preview').innerHTML='<div class="preview-empty"><i data-lucide="layout-template" style="width:40px;height:40px;color:var(--muted)"></i><div>Adicione perguntas<br>para visualizar</div></div>';
+    document.getElementById('edit-panel').innerHTML='<div class="panel-empty">Selecione uma pergunta<br>para editar.</div>';
+    lucide.createIcons();
+  }
+  debounceSave();
+}
+
+// ── Save ───────────────────────────────────────────────────
+function debounceSave() {
+  const ind = document.getElementById('save-indicator');
+  ind.innerHTML = '<i data-lucide="dot" class="icon"></i> não salvo';
+  lucide.createIcons();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveAll, 2000);
+}
+
+async function saveAll() {
+  clearTimeout(saveTimer);
+  persistFlowState();
+  const ind = document.getElementById('save-indicator');
+  ind.textContent = 'Salvando...';
+  const client = await initSb();
+  const newTitle = document.getElementById('quiz-title-input').value.trim() || quiz.title;
+  await client.from('quizzes').update({ title: newTitle, settings: quiz.settings||{} }).eq('id', quizId);
+  quiz.title = newTitle;
+
+  for (const q of questions) {
+    const payload = {
+      quiz_id:quizId, position:q.position, type:q.type,
+      title:q.title||'', description:q.description||'', required:q.required,
+      settings:{
+        ...(q.videoUrl !== undefined && { videoUrl: q.videoUrl }),
+        ...(q.autoAdvance !== undefined && { autoAdvance: q.autoAdvance }),
+        ...(q.autoAdvanceDelay !== undefined && { autoAdvanceDelay: q.autoAdvanceDelay }),
+      }
+    };
+    let qId = q.id;
+    if (q._new) {
+      const { data } = await client.from('questions').insert(payload).select().single();
+      if (data) { q.id=data.id; q._new=false; qId=data.id; }
+    } else {
+      await client.from('questions').update(payload).eq('id', qId);
+    }
+    await client.from('options').delete().eq('question_id', qId);
+    if (q.options?.length) {
+      await client.from('options').insert(q.options.map((o,i)=>({question_id:qId,position:i,label:o.label,value:o.value,emoji:o.emoji||null})));
+    }
+  }
+
+  const savedIds = questions.filter(q=>!q._new).map(q=>q.id);
+  const { data:dbQs } = await client.from('questions').select('id').eq('quiz_id',quizId);
+  const toDelete = (dbQs||[]).filter(q=>!savedIds.includes(q.id)).map(q=>q.id);
+  if (toDelete.length) await client.from('questions').delete().in('id',toDelete);
+
+  ind.innerHTML = '<i data-lucide="check" class="icon"></i> salvo';
+  lucide.createIcons();
+  setTimeout(()=>{ ind.textContent=''; }, 2000);
+}
+
+// ── Publish ────────────────────────────────────────────────
+function updateStatusBtn() {
+  const btn = document.getElementById('status-btn');
+  const icon = document.getElementById('status-icon');
+  const label = document.getElementById('status-label');
+  if (quiz.status==='published') {
+    if (icon) icon.setAttribute('data-lucide','pause-circle');
+    if (label) label.textContent = 'Pausar';
+    btn.classList.add('published'); btn.classList.remove('primary');
+  } else {
+    if (icon) icon.setAttribute('data-lucide','zap');
+    if (label) label.textContent = 'Publicar';
+    btn.classList.remove('published');
+  }
+  lucide.createIcons();
+}
+
+async function togglePublish() {
+  const client = await initSb();
+  const s = quiz.status==='published'?'draft':'published';
+  await client.from('quizzes').update({status:s}).eq('id',quizId);
+  quiz.status=s; updateStatusBtn();
+  if (s==='published') alert(`Quiz publicado!\nLink: ${location.origin}/q/${quiz.slug}`);
+  else alert('Quiz pausado.');
+}
+
+function previewQuiz() { window.open(`/q/${quiz?.slug}`, '_blank'); }
+
+// ── Device ─────────────────────────────────────────────────
+function setDevice(d) {
+  const m=d==='mobile';
+  document.getElementById('device-frame').classList.toggle('mobile',m);
+  document.getElementById('dv-desktop').classList.toggle('active',!m);
+  document.getElementById('dv-mobile').classList.toggle('active',m);
+}
+
+// ── Helpers ────────────────────────────────────────────────
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function tmpId() { return 'tmp-'+Math.random().toString(36).slice(2); }
+
+document.getElementById('quiz-title-input').addEventListener('input', debounceSave);
+
+// ── Flow Canvas ────────────────────────────────────────────
+let builderMode = 'editor';
+let flowZoom = 1;
+let flowPanX = 0, flowPanY = 0;
+let flowDragging = null;   // { idx, startMX, startMY, origX, origY } OR { special:'__start'|'__end', ... }
+let flowConnecting = null; // { fromId, fromOption, startX, startY }
+let flowSelectedConn = null;
+let flowConnDelBtn = null;
+let flowCtxMenu = null;
+let flowSpecialPos = { __start: { x: 80, y: 200 - 30 }, __end: { x: 620, y: 200 - 30 } };
+let flowDrawerIdx = -1;
+let flowIsPanning = false;
+let flowPanStart = null;
+
+const NODE_W = 210, NODE_H_BASE = 78;
+
+// ── Toggle editor ↔ flow ──
+function toggleMode() {
+  builderMode = builderMode === 'editor' ? 'flow' : 'editor';
+  document.body.dataset.mode = builderMode;
+  const modeIcon = document.getElementById('mode-icon');
+  if (builderMode === 'flow') {
+    modeIcon.setAttribute('data-lucide', 'layout-template');
+    document.getElementById('flow-canvas').classList.add('active');
+    initFlowCanvas();
+    closeFlowDrawer();
+  } else {
+    modeIcon.setAttribute('data-lucide', 'git-fork');
+    document.getElementById('flow-canvas').classList.remove('active');
+    destroyFlowCanvas();
+  }
+  lucide.createIcons();
+}
+
+// ── Init flow canvas ──
+function initFlowCanvas() {
+  const positions = quiz?.settings?.flow_positions || {};
+  // Auto-layout if no positions saved
+  if (!Object.keys(positions).length) autoLayoutFlow();
+  else questions.forEach(q => {
+    if (positions[q.id]) { q._flowX = positions[q.id].x; q._flowY = positions[q.id].y; }
+    else { q._flowX = 80 + questions.indexOf(q) * 260; q._flowY = 200; }
+  });
+
+  // Restore connections
+  const conns = quiz?.settings?.flow_connections || {};
+  questions.forEach(q => { q._connections = conns[q.id] || []; });
+
+  // Restore special node positions
+  if (quiz?.settings?.flow_start_pos) { flowSpecialPos.__start = { ...quiz.settings.flow_start_pos, _manuallyMoved: true }; }
+  if (quiz?.settings?.flow_end_pos)   { flowSpecialPos.__end   = { ...quiz.settings.flow_end_pos,   _manuallyMoved: true }; }
+
+  renderFlowNodes();
+  renderFlowConnections();
+  applyFlowTransform();
+
+  // Pan on canvas background
+  const canvas = document.getElementById('flow-canvas');
+  canvas.addEventListener('mousedown', onCanvasMousedown);
+  document.addEventListener('mousemove', onFlowMousemove);
+  document.addEventListener('mouseup', onFlowMouseup);
+  canvas.addEventListener('wheel', onFlowWheel, { passive: false });
+  canvas.addEventListener('click', onCanvasClick);
+}
+
+function destroyFlowCanvas() {
+  const canvas = document.getElementById('flow-canvas');
+  canvas.removeEventListener('mousedown', onCanvasMousedown);
+  document.removeEventListener('mousemove', onFlowMousemove);
+  document.removeEventListener('mouseup', onFlowMouseup);
+  canvas.removeEventListener('wheel', onFlowWheel);
+  canvas.removeEventListener('click', onCanvasClick);
+  removeCtxMenu();
+  removeConnDelBtn();
+}
+
+// ── Auto layout ──
+function autoLayoutFlow() {
+  const startX = 80, startY = 200, gapX = 260;
+  questions.forEach((q, i) => { q._flowX = startX + (i + 1) * gapX; q._flowY = startY; });
+}
+
+// ── Render nodes ──
+function renderFlowNodes() {
+  const container = document.getElementById('flow-nodes');
+  // Update end node position to follow the last question
+  const lastQ = questions[questions.length - 1];
+  if (lastQ) {
+    const autoEndX = lastQ._flowX + NODE_W + 260;
+    // Only auto-position if user hasn't manually moved it
+    if (!flowSpecialPos.__end._manuallyMoved) {
+      flowSpecialPos.__end.x = autoEndX;
+      flowSpecialPos.__end.y = 200 - NODE_H_BASE / 2;
+    }
+  }
+  if (!flowSpecialPos.__start._manuallyMoved) {
+    flowSpecialPos.__start.x = 80;
+    flowSpecialPos.__start.y = 200 - NODE_H_BASE / 2;
+  }
+
+  const startNode = createSpecialNode('__start', 'Início', 'play', flowSpecialPos.__start.x, flowSpecialPos.__start.y);
+  const endNode   = createSpecialNode('__end',   'Fim',    'flag', flowSpecialPos.__end.x,   flowSpecialPos.__end.y);
+
+  container.innerHTML = startNode + questions.map((q, i) => createQuestionNode(q, i)).join('') + endNode;
+  lucide.createIcons();
+
+  // Attach drag to special nodes
+  ['__start', '__end'].forEach(specialId => {
+    const el = container.querySelector(`.flow-node[data-id="${specialId}"]`);
+    if (!el) return;
+    el.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      if (e.target.closest('.port-out')) return;
+      e.stopPropagation();
+      flowDragging = { special: specialId, startMX: e.clientX, startMY: e.clientY, origX: flowSpecialPos[specialId].x, origY: flowSpecialPos[specialId].y };
+      el.classList.add('dragging');
+    });
+  });
+
+  // Attach node events
+  container.querySelectorAll('.flow-node').forEach(el => {
+    const id = el.dataset.id;
+    const idx = questions.findIndex(q => q.id === id);
+    if (idx === -1) return; // start/end nodes handled separately above
+
+    el.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      if (e.target.closest('.port-out')) return;
+      e.stopPropagation();
+      flowDragging = { idx, startMX: e.clientX, startMY: e.clientY, origX: questions[idx]._flowX, origY: questions[idx]._flowY };
+      el.classList.add('dragging');
+    });
+
+    el.addEventListener('click', e => {
+      if (e.target.closest('.port-out')) return;
+      if (flowDragging) return;
+      openFlowDrawer(idx);
+    });
+
+    el.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      showCtxMenu(e.clientX, e.clientY, idx);
+    });
+
+    // Port out listeners
+    el.querySelectorAll('.port-out').forEach(port => {
+      port.addEventListener('mousedown', e => {
+        e.stopPropagation();
+        const fromOption = port.dataset.option || null;
+        const nodeRect = el.getBoundingClientRect();
+        const portRect = port.getBoundingClientRect();
+        flowConnecting = {
+          fromId: id,
+          fromOption,
+          startX: questions[idx]._flowX + NODE_W,
+          startY: questions[idx]._flowY + (portRect.top - nodeRect.top) + 6,
+        };
+      });
+    });
+  });
+}
+
+function createSpecialNode(id, label, icon, x, y) {
+  return `<div class="flow-node" data-id="${id}" style="left:${x}px;top:${y}px;width:${NODE_W}px">
+    <div style="position:absolute;top:-6px;left:50%;transform:translateX(-50%)" class="port-in"></div>
+    <div class="node-header">
+      <div class="node-header-icon"><i data-lucide="${icon}" class="icon"></i></div>
+      <span class="node-special">${label}</span>
+    </div>
+    ${id !== '__end' ? `<div class="node-ports-out"><div class="node-port-row"><span></span><div class="port-out" data-option=""></div></div></div>` : ''}
+  </div>`;
+}
+
+function createQuestionNode(q, i) {
+  const icon = TYPE_ICONS[q.type] || 'help-circle';
+  const label = TYPE_LABELS[q.type]?.split(' ')[0] || q.type;
+  const hasOpts = (q.type==='multiple_choice'||q.type==='video_question') && q.options?.length;
+
+  const ports = hasOpts
+    ? q.options.map(o => `<div class="node-port-row"><span style="font-size:11px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(o.label||'Opção')}</span><div class="port-out" data-option="${escAttr(o.value)}"></div></div>`).join('')
+    : `<div class="node-port-row"><span></span><div class="port-out" data-option=""></div></div>`;
+
+  return `<div class="flow-node ${flowDrawerIdx===i?'selected':''}" data-id="${escAttr(q.id)}" style="left:${q._flowX}px;top:${q._flowY}px;width:${NODE_W}px">
+    <div style="position:absolute;top:-6px;left:50%;transform:translateX(-50%)" class="port-in"></div>
+    <div class="node-header">
+      <div class="node-header-icon"><i data-lucide="${icon}" class="icon"></i></div>
+      <span class="node-header-type">${label}</span>
+    </div>
+    <div class="node-body${q.title?'':' empty'}">${q.title ? escHtml(q.title) : 'Sem título'}</div>
+    <div class="node-ports-out">${ports}</div>
+  </div>`;
+}
+
+// ── Render SVG connections ──
+function renderFlowConnections() {
+  const svg = document.getElementById('flow-svg');
+  svg.innerHTML = '';
+
+  // Set SVG size to fit world
+  const allX = questions.map(q => q._flowX + NODE_W + 300).concat([800]);
+  const allY = questions.map(q => q._flowY + 200).concat([600]);
+  svg.setAttribute('width', Math.max(...allX));
+  svg.setAttribute('height', Math.max(...allY));
+
+  // Start → Q0
+  if (questions.length) {
+    const startX = flowSpecialPos.__start.x + NODE_W, startY = flowSpecialPos.__start.y + NODE_H_BASE / 2;
+    const q0 = questions[0];
+    const endX = q0._flowX, endY = q0._flowY + NODE_H_BASE / 2;
+    drawConnection(svg, null, null, '__start', null, startX, startY, endX, endY, false);
+  }
+
+  // Question connections
+  questions.forEach(q => {
+    const conns = q._connections || [];
+    const hasOpts = (q.type==='multiple_choice'||q.type==='video_question') && q.options?.length;
+
+    if (!conns.length) {
+      // Default: connect to next question
+      const nextIdx = questions.indexOf(q) + 1;
+      const targetQ = nextIdx < questions.length ? questions[nextIdx] : null;
+      const fromPortY = hasOpts && q.options?.length
+        ? q._flowY + 78 + Math.floor(q.options.length / 2) * 28
+        : q._flowY + NODE_H_BASE / 2;
+      if (targetQ) {
+        drawConnection(svg, q.id, null, targetQ.id, null, q._flowX + NODE_W, fromPortY, targetQ._flowX, targetQ._flowY + NODE_H_BASE / 2, false);
+      } else {
+        // Connect to end node
+        drawConnection(svg, q.id, null, '__end', null, q._flowX + NODE_W, fromPortY, flowSpecialPos.__end.x, flowSpecialPos.__end.y + NODE_H_BASE / 2, false);
+      }
+    } else {
+      conns.forEach(conn => {
+        const targetQ = questions.find(tq => tq.id === conn.toQuestionId);
+        if (!targetQ) return;
+        const fromOpt = conn.fromOption ? q.options?.findIndex(o => o.value === conn.fromOption) : -1;
+        const fromPortY = fromOpt >= 0 ? q._flowY + 78 + fromOpt * 28 + 14 : q._flowY + NODE_H_BASE / 2;
+        drawConnection(svg, q.id, conn.fromOption, targetQ.id, null, q._flowX + NODE_W, fromPortY, targetQ._flowX, targetQ._flowY + NODE_H_BASE / 2, !!conn.fromOption);
+      });
+    }
+  });
+}
+
+function drawConnection(svg, fromId, fromOption, toId, toOption, x1, y1, x2, y2, isConditional) {
+  const dx = Math.abs(x2 - x1) * 0.6 + 40;
+  const d = `M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', isConditional ? 'var(--cta)' : 'var(--accent)');
+  path.setAttribute('stroke-width', '2');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('class', `conn${flowSelectedConn?.fromId===fromId&&flowSelectedConn?.fromOption===fromOption?' selected':''}`);
+  if (fromId && toId) {
+    path.dataset.fromId = fromId;
+    path.dataset.fromOption = fromOption || '';
+    path.dataset.toId = toId;
+    path.addEventListener('click', e => { e.stopPropagation(); selectConnection(path, e.clientX, e.clientY, fromId, fromOption, toId); });
+  }
+  svg.appendChild(path);
+
+  // Label for conditional connections
+  if (isConditional && fromOption) {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 - 10;
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', mx); text.setAttribute('y', my);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('font-size', '10'); text.setAttribute('fill', 'var(--cta)');
+    text.setAttribute('font-family', 'Plus Jakarta Sans, sans-serif');
+    text.setAttribute('font-weight', '600');
+    text.textContent = fromOption.length > 12 ? fromOption.slice(0,12)+'…' : fromOption;
+    svg.appendChild(text);
+  }
+}
+
+function selectConnection(path, cx, cy, fromId, fromOption, toId) {
+  flowSelectedConn = { fromId, fromOption, toId };
+  renderFlowConnections(); // re-render to show selected
+  removeConnDelBtn();
+  flowConnDelBtn = document.createElement('button');
+  flowConnDelBtn.className = 'conn-del-btn';
+  flowConnDelBtn.title = 'Remover conexão';
+  flowConnDelBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="20" y1="4" x2="14.5" y2="9.5"/><line x1="3.5" y1="14.5" x2="9" y2="20"/><path d="M17 4l3 3-4.5 4.5-3-3Z"/><path d="M3.5 17.5l3 3 4.5-4.5-3-3Z"/><line x1="11" y1="9" x2="13" y2="11"/></svg>';
+  flowConnDelBtn.style.top = (cy - 16) + 'px';
+  flowConnDelBtn.style.left = (cx + 10) + 'px';
+  flowConnDelBtn.addEventListener('click', () => {
+    const q = questions.find(q => q.id === fromId);
+    if (q) { q._connections = (q._connections||[]).filter(c => !(c.fromOption===(fromOption||null) && c.toQuestionId===toId)); }
+    flowSelectedConn = null;
+    removeConnDelBtn();
+    renderFlowConnections();
+    debounceSave();
+  });
+  document.body.appendChild(flowConnDelBtn);
+}
+
+function removeConnDelBtn() { if (flowConnDelBtn) { flowConnDelBtn.remove(); flowConnDelBtn = null; } }
+
+// ── Mouse events ──
+function onCanvasMousedown(e) {
+  if (e.button !== 0) return;
+  if (e.target.closest('.flow-node') || e.target.closest('.flow-controls') || e.target.closest('.ctx-menu')) return;
+  flowIsPanning = true;
+  flowPanStart = { x: e.clientX - flowPanX, y: e.clientY - flowPanY };
+  document.getElementById('flow-canvas').style.cursor = 'grabbing';
+}
+
+function onFlowMousemove(e) {
+  if (flowDragging) {
+    const { startMX, startMY, origX, origY } = flowDragging;
+    const dx = (e.clientX - startMX) / flowZoom;
+    const dy = (e.clientY - startMY) / flowZoom;
+
+    if (flowDragging.special) {
+      const sid = flowDragging.special;
+      flowSpecialPos[sid].x = origX + dx;
+      flowSpecialPos[sid].y = origY + dy;
+      flowSpecialPos[sid]._manuallyMoved = true;
+      const el = document.querySelector(`.flow-node[data-id="${sid}"]`);
+      if (el) { el.style.left = flowSpecialPos[sid].x + 'px'; el.style.top = flowSpecialPos[sid].y + 'px'; }
+    } else {
+      const { idx } = flowDragging;
+      questions[idx]._flowX = origX + dx;
+      questions[idx]._flowY = origY + dy;
+      const nodes = document.querySelectorAll('.flow-node');
+      nodes.forEach(n => {
+        if (n.dataset.id === questions[idx].id) {
+          n.style.left = questions[idx]._flowX + 'px';
+          n.style.top  = questions[idx]._flowY + 'px';
+        }
+      });
+    }
+    renderFlowConnections();
+  }
+
+  if (flowIsPanning && flowPanStart) {
+    flowPanX = e.clientX - flowPanStart.x;
+    flowPanY = e.clientY - flowPanStart.y;
+    applyFlowTransform();
+  }
+
+  if (flowConnecting) {
+    // Draw preview line
+    const svg = document.getElementById('flow-svg');
+    let preview = svg.querySelector('#conn-preview');
+    if (!preview) {
+      preview = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      preview.id = 'conn-preview';
+      preview.setAttribute('fill', 'none');
+      preview.setAttribute('stroke', 'var(--accent)');
+      preview.setAttribute('stroke-width', '2');
+      preview.setAttribute('stroke-dasharray', '6,4');
+      svg.appendChild(preview);
+    }
+    const canvasRect = document.getElementById('flow-canvas').getBoundingClientRect();
+    const mx = (e.clientX - canvasRect.left - flowPanX) / flowZoom;
+    const my = (e.clientY - canvasRect.top  - flowPanY) / flowZoom;
+    const dx = Math.abs(mx - flowConnecting.startX) * 0.6 + 40;
+    preview.setAttribute('d', `M${flowConnecting.startX},${flowConnecting.startY} C${flowConnecting.startX+dx},${flowConnecting.startY} ${mx-dx},${my} ${mx},${my}`);
+  }
+}
+
+function onFlowMouseup(e) {
+  if (flowDragging) {
+    document.querySelectorAll('.flow-node').forEach(n => n.classList.remove('dragging'));
+    flowDragging = null;
+    debounceSave();
+  }
+
+  if (flowIsPanning) {
+    flowIsPanning = false;
+    flowPanStart = null;
+    document.getElementById('flow-canvas').style.cursor = 'default';
+  }
+
+  if (flowConnecting) {
+    // Check if mouseup is on a node (port-in area)
+    const target = e.target.closest('.flow-node');
+    if (target) {
+      const toId = target.dataset.id;
+      if (toId && toId !== flowConnecting.fromId && toId !== '__start' && toId !== '__end') {
+        const fromQ = questions.find(q => q.id === flowConnecting.fromId);
+        if (fromQ) {
+          if (!fromQ._connections) fromQ._connections = [];
+          // Remove default passthrough if exists
+          fromQ._connections = fromQ._connections.filter(c => c.toQuestionId !== toId);
+          fromQ._connections.push({ fromOption: flowConnecting.fromOption || null, toQuestionId: toId });
+          renderFlowConnections();
+          debounceSave();
         }
       }
     }
-
-    // Delete questions removed from UI
-    const currentIds = questions.map(q => q.id).filter(id => !id.startsWith('tmp-'));
-    if (currentIds.length >= 0) {
-      const { data: dbQs } = await sb.from('questions').select('id').eq('quiz_id', quizId);
-      const toDelete = (dbQs||[]).filter(q => !currentIds.includes(q.id)).map(q => q.id);
-      if (toDelete.length) await sb.from('questions').delete().in('id', toDelete);
-    }
-
-    document.getElementById('save-indicator').textContent = '✓ salvo';
-    setTimeout(() => document.getElementById('save-indicator').textContent = '', 2000);
+    // Remove preview
+    document.getElementById('flow-svg').querySelector('#conn-preview')?.remove();
+    flowConnecting = null;
   }
+}
 
-  // ── Publish ────────────────────────────────────────────────
-  function updateStatusBtn() {
-    const btn = document.getElementById('status-btn');
-    if (quiz.status === 'published') {
-      btn.textContent = '⏸ Pausar';
-    } else {
-      btn.textContent = '🚀 Publicar';
-    }
+function onFlowWheel(e) {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.1 : 0.1;
+  flowZoom = Math.max(0.3, Math.min(2.0, +(flowZoom + delta).toFixed(1)));
+  applyFlowTransform();
+}
+
+function onCanvasClick(e) {
+  if (e.target === document.getElementById('flow-canvas') || e.target === document.getElementById('flow-world')) {
+    flowSelectedConn = null;
+    removeConnDelBtn();
+    removeCtxMenu();
+    renderFlowConnections();
   }
+}
 
-  async function togglePublish() {
-    const sb = await initSupabase();
-    const newStatus = quiz.status === 'published' ? 'draft' : 'published';
-    await sb.from('quizzes').update({ status: newStatus }).eq('id', quizId);
-    quiz.status = newStatus;
-    updateStatusBtn();
-    const msg = newStatus === 'published'
-      ? `Quiz publicado!\nLink: ${location.origin}/q/${quiz.slug}`
-      : 'Quiz pausado. Só você pode ver.';
-    alert(msg);
-  }
+// ── Zoom ──
+function applyFlowTransform() {
+  document.getElementById('flow-world').style.transform = `translate(${flowPanX}px,${flowPanY}px) scale(${flowZoom})`;
+  document.getElementById('zoom-label').textContent = Math.round(flowZoom * 100) + '%';
+}
+function flowZoomIn()    { flowZoom = Math.min(2.0, +(flowZoom + 0.1).toFixed(1)); applyFlowTransform(); }
+function flowZoomOut()   { flowZoom = Math.max(0.3, +(flowZoom - 0.1).toFixed(1)); applyFlowTransform(); }
+function flowZoomReset() { flowZoom = 1; flowPanX = 0; flowPanY = 0; applyFlowTransform(); }
 
-  // ── Preview link ───────────────────────────────────────────
-  function previewQuiz() { window.open(`/q/${quiz?.slug}`, '_blank'); }
+// ── Context menu ──
+function showCtxMenu(cx, cy, idx) {
+  removeCtxMenu();
+  flowCtxMenu = document.createElement('div');
+  flowCtxMenu.className = 'ctx-menu';
+  flowCtxMenu.style.top = cy + 'px';
+  flowCtxMenu.style.left = cx + 'px';
+  flowCtxMenu.innerHTML = `
+    <button class="ctx-item" onclick="openFlowDrawer(${idx});removeCtxMenu()"><i data-lucide="pencil" class="icon"></i> Editar</button>
+    <button class="ctx-item" onclick="duplicateQuestion(${idx});removeCtxMenu()"><i data-lucide="copy" class="icon"></i> Duplicar</button>
+    <button class="ctx-item danger" onclick="deleteFlowQuestion(${idx});removeCtxMenu()"><i data-lucide="trash-2" class="icon"></i> Deletar</button>
+  `;
+  document.body.appendChild(flowCtxMenu);
+  lucide.createIcons();
+  setTimeout(() => document.addEventListener('click', removeCtxMenu, { once: true }), 0);
+}
+function removeCtxMenu() { if (flowCtxMenu) { flowCtxMenu.remove(); flowCtxMenu = null; } }
 
-  // ── Device toggle ──────────────────────────────────────────
-  function setDevice(d) {
-    isMobile = d === 'mobile';
-    document.getElementById('device-frame').classList.toggle('mobile', isMobile);
-    document.getElementById('dv-desktop').classList.toggle('active', !isMobile);
-    document.getElementById('dv-mobile').classList.toggle('active', isMobile);
-  }
+function duplicateQuestion(idx) {
+  const orig = questions[idx];
+  const copy = JSON.parse(JSON.stringify(orig));
+  copy.id = tmpId(); copy._new = true;
+  copy._flowX = (orig._flowX||0) + 40; copy._flowY = (orig._flowY||0) + 40;
+  copy._connections = [];
+  copy.position = questions.length;
+  // New temp IDs for options
+  (copy.options||[]).forEach(o => { o.id = tmpId(); });
+  questions.push(copy);
+  renderFlowNodes();
+  renderFlowConnections();
+  debounceSave();
+}
 
-  // ── Helpers ────────────────────────────────────────────────
-  function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function tmpId()   { return 'tmp-' + Math.random().toString(36).slice(2); }
-  function typeIcon(t) {
-    return { multiple_choice:'🔘', checkbox:'☑️', text:'✏️', email:'📧', phone:'📱', name:'👤', rating:'⭐', nps:'📊', statement:'💬' }[t] || '❓';
-  }
+function deleteFlowQuestion(idx) {
+  if (!confirm('Remover esta pergunta?')) return;
+  questions.splice(idx, 1);
+  questions.forEach((q,j) => q.position = j);
+  if (activeIdx >= questions.length) activeIdx = questions.length - 1;
+  renderFlowNodes();
+  renderFlowConnections();
+  debounceSave();
+}
 
-  // Title input saves
-  document.getElementById('quiz-title-input')?.addEventListener('input', debounceSave);
+// ── Drawer ──
+function openFlowDrawer(idx) {
+  flowDrawerIdx = idx;
+  activeIdx = idx;
+  activeTab = 'question';
+  const body = document.getElementById('drawer-body');
+  const q = questions[idx];
+  body.innerHTML = `
+    <div class="panel-tabs" style="margin:0">
+      <button class="panel-tab active" onclick="switchTab('question')">Pergunta</button>
+      <button class="panel-tab" onclick="switchTab('config')">Config</button>
+    </div>
+    <div id="panel-body">${renderQuestionTab(q)}</div>
+  `;
+  attachPanelListeners(q);
+  document.getElementById('flow-drawer').classList.add('open');
+  lucide.createIcons();
+  // Update selected node visually
+  document.querySelectorAll('.flow-node').forEach(n => n.classList.remove('selected'));
+  document.querySelector(`.flow-node[data-id="${q.id}"]`)?.classList.add('selected');
+}
+
+function closeFlowDrawer() {
+  flowDrawerIdx = -1;
+  document.getElementById('flow-drawer').classList.remove('open');
+  document.querySelectorAll('.flow-node').forEach(n => n.classList.remove('selected'));
+}
+
+// ── Persist flow state before every save ──
+function persistFlowState() {
+  if (!quiz) return;
+  if (!quiz.settings) quiz.settings = {};
+  const positions = {};
+  questions.forEach(q => { if (q._flowX !== undefined) positions[q.id] = { x: q._flowX, y: q._flowY }; });
+  quiz.settings.flow_positions = positions;
+  const connections = {};
+  questions.forEach(q => { if (q._connections?.length) connections[q.id] = q._connections; });
+  quiz.settings.flow_connections = connections;
+  // Persist special node positions if manually moved
+  if (flowSpecialPos.__start._manuallyMoved) quiz.settings.flow_start_pos = { x: flowSpecialPos.__start.x, y: flowSpecialPos.__start.y };
+  if (flowSpecialPos.__end._manuallyMoved)   quiz.settings.flow_end_pos   = { x: flowSpecialPos.__end.x,   y: flowSpecialPos.__end.y };
+}
 </script>
 </body>
 </html>

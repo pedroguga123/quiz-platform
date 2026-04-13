@@ -3,35 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InLead — Resultados</title>
+<title>Funnly — Resultados</title>
+<script>if(localStorage.getItem('funnly-theme')==='dark')document.body.classList.add('dark')</script>
 <script src="/api/env"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
   :root {
-    --ink:    #0d0d12;
-    --paper:  #f7f5f0;
-    --accent: #5a3af7;
-    --soft:   #e8e4ff;
-    --muted:  #9190a4;
-    --border: #e2e0ee;
+    --ink:    #0f0a1e;
+    --paper:  #f9f7ff;
+    --accent: #a855f7;
+    --soft:   #f3ebff;
+    --muted:  #9d8fb0;
+    --border: #e8e0f5;
     --danger: #e5484d;
     --success:#22c55e;
+    --cta:    #fb923c;
     --radius: 12px;
     --sidebar-w: 240px;
   }
+  body.dark {
+    --ink:     #f0ecff; --paper:   #0a0a0f; --surface: #110d1f;
+    --accent:  #a855f7; --glow:    #c084fc; --soft:    #1a1030;
+    --muted:   #7c6f9a; --border:  #1e1a2e; --danger:  #f87171; --success: #4ade80;
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; display: flex; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; display: flex; transition: background .2s, color .2s; }
 
   /* SIDEBAR */
   .sidebar {
-    width: var(--sidebar-w); background: #fff;
+    width: var(--sidebar-w); background: var(--surface, #fff);
     border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
     position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
   }
-  .sidebar-logo { padding: 24px 20px; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--accent); letter-spacing: -.5px; border-bottom: 1px solid var(--border); }
-  .sidebar-logo span { color: var(--ink); }
+  .sidebar-logo { padding: 20px; display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 20px; color: var(--accent); letter-spacing: -.5px; border-bottom: 1px solid var(--border); text-decoration: none; }
+  .sidebar-logo svg { width: 28px; height: 28px; flex-shrink: 0; }
   .sidebar-nav { flex: 1; padding: 16px 12px; }
   .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; color: var(--muted); cursor: pointer; text-decoration: none; margin-bottom: 2px; transition: all .15s; }
   .nav-item:hover { background: var(--paper); color: var(--ink); }
@@ -41,27 +49,27 @@
   /* MAIN */
   .main { margin-left: var(--sidebar-w); flex: 1; padding: 40px 48px; }
   .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
-  .page-header h1 { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -.5px; }
+  .page-header h1 { font-size: 26px; font-weight: 800; letter-spacing: -.5px; }
   .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
   .header-actions { margin-left: auto; display: flex; gap: 8px; }
   .btn-sm {
     padding: 9px 18px; border-radius: 8px;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500;
     cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--ink); transition: all .15s;
   }
   .btn-sm:hover { background: var(--paper); }
-  .btn-sm.primary { background: var(--accent); color: #fff; border-color: transparent; box-shadow: 0 2px 10px rgba(90,58,247,.3); }
+  .btn-sm.primary { background: var(--cta); color: #fff; border-color: transparent; box-shadow: 0 2px 10px rgba(251,146,60,.3); }
   .btn-sm.primary:hover { opacity: .9; }
 
   /* STATS */
   .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-  .stat-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .stat-card { background: var(--surface, #fff); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
   .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-  .stat-value { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -1px; }
+  .stat-value { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
   .stat-value.accent { color: var(--accent); }
 
   /* TABLE */
-  .table-wrap { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-wrap { background: var(--surface, #fff); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
   .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
   .table-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
   table { width: 100%; border-collapse: collapse; }
@@ -88,10 +96,10 @@
   /* DETAIL MODAL */
   .modal-overlay { position: fixed; inset: 0; z-index: 999; background: rgba(13,13,18,.6); backdrop-filter: blur(8px); display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
   .modal-overlay.open { display: flex; }
-  .modal { background: #fff; border-radius: 20px; padding: 32px; width: 100%; max-width: 560px; box-shadow: 0 24px 80px rgba(0,0,0,.2); animation: slideUp .25s cubic-bezier(.16,1,.3,1); }
+  .modal { background: var(--surface, #fff); border-radius: 20px; padding: 32px; width: 100%; max-width: 560px; box-shadow: 0 24px 80px rgba(0,0,0,.2); animation: slideUp .25s cubic-bezier(.16,1,.3,1); }
   @keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
   .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-  .modal-head h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+  .modal-head h3 { font-size: 20px; font-weight: 800; }
   .modal-close { background: none; border: none; font-size: 20px; color: var(--muted); cursor: pointer; }
   .respondent-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
   .info-field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); display: block; margin-bottom: 4px; }
@@ -112,11 +120,29 @@
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="sidebar-logo">In<span>Lead</span></div>
+  <a href="/dashboard.html" class="sidebar-logo">
+    <svg viewBox="0 0 52 52" fill="none">
+      <rect x="4" y="5" width="44" height="9" rx="4.5" fill="#a855f7"/>
+      <rect x="10" y="18" width="32" height="8" rx="4" fill="#a855f7" opacity="0.65"/>
+      <rect x="18" y="30" width="16" height="7" rx="3.5" fill="#a855f7" opacity="0.4"/>
+      <path d="M22 40 L26 47 L30 40" stroke="#fb923c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    funnly
+  </a>
   <nav class="sidebar-nav">
-    <a href="/dashboard.html" class="nav-item"><span class="nav-icon">📋</span> Meus quizzes</a>
-    <a href="#" class="nav-item active"><span class="nav-icon">📊</span> Resultados</a>
+    <a href="/dashboard.html" class="nav-item"><span class="nav-icon"><i data-lucide="layout-grid" style="width:17px;height:17px"></i></span> Meus quizzes</a>
+    <a href="/integrations.html" class="nav-item"><span class="nav-icon"><i data-lucide="plug" style="width:17px;height:17px"></i></span> Integrações</a>
+    <a href="/settings.html" class="nav-item"><span class="nav-icon"><i data-lucide="settings" style="width:17px;height:17px"></i></span> Configurações</a>
   </nav>
+  <div class="sidebar-footer" style="padding:16px 12px;border-top:1px solid var(--border);">
+    <a href="/settings.html" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='var(--paper)'" onmouseout="this.style.background=''">
+      <div class="avatar" id="user-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;">?</div>
+      <div style="flex:1;min-width:0;">
+        <div id="user-name" style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Carregando...</div>
+        <div id="user-email" style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      </div>
+    </a>
+  </div>
 </aside>
 
 <!-- MAIN -->
@@ -125,8 +151,8 @@
     <button onclick="window.location.href='/dashboard.html'" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px">←</button>
     <h1 id="page-title">Carregando...</h1>
     <div class="header-actions">
-      <button class="btn-sm" onclick="copyQuizLink()">🔗 Copiar link</button>
-      <button class="btn-sm primary" onclick="exportCSV()">⬇ Exportar CSV</button>
+      <button class="btn-sm" onclick="copyQuizLink()" style="display:flex;align-items:center;gap:6px"><i data-lucide="link" style="width:14px;height:14px"></i> Copiar link</button>
+      <button class="btn-sm primary" onclick="exportCSV()" style="display:flex;align-items:center;gap:6px"><i data-lucide="download" style="width:14px;height:14px"></i> Exportar CSV</button>
     </div>
   </div>
   <p class="page-sub" id="page-sub"></p>
@@ -156,7 +182,7 @@
   <div class="modal">
     <div class="modal-head">
       <h3>Detalhes da resposta</h3>
-      <button class="modal-close" onclick="closeDetail()">✕</button>
+      <button class="modal-close" onclick="closeDetail()"><i data-lucide="x" style="width:16px;height:16px"></i></button>
     </div>
     <div id="detail-content"></div>
   </div>
@@ -182,6 +208,13 @@
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { window.location.href = '/'; return; }
     currentUser = session.user;
+    const name = currentUser.user_metadata?.display_name || currentUser.email.split('@')[0];
+    const avatarEl = document.getElementById('user-avatar');
+    const nameEl = document.getElementById('user-name');
+    const emailEl = document.getElementById('user-email');
+    if (avatarEl) avatarEl.textContent = name.charAt(0).toUpperCase();
+    if (nameEl) nameEl.textContent = name;
+    if (emailEl) emailEl.textContent = currentUser.email;
     quizId = new URLSearchParams(location.search).get('id');
     if (!quizId) { window.location.href = '/dashboard.html'; return; }
     await loadData();
@@ -194,7 +227,7 @@
     if (!q) { window.location.href = '/dashboard.html'; return; }
     quizData = q;
     document.getElementById('page-title').textContent = q.title;
-    document.getElementById('page-sub').textContent   = `/${q.slug}  ·  ${q.status === 'published' ? '🟢 Publicado' : '🟡 Rascunho'}`;
+    document.getElementById('page-sub').textContent   = `/${q.slug}  ·  ${q.status === 'published' ? '● Publicado' : '○ Rascunho'}`;
 
     // Load questions
     const { data: qs } = await sb.from('questions').select('*').eq('quiz_id', quizId).order('position');
@@ -227,7 +260,7 @@
   function renderTable() {
     const body = document.getElementById('table-body');
     if (!responses.length) {
-      body.innerHTML = `<div class="loading-state" style="flex-direction:column;gap:8px"><div style="font-size:32px">📭</div><div>Nenhuma resposta ainda.</div></div>`;
+      body.innerHTML = `<div class="loading-state" style="flex-direction:column;gap:8px"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><div>Nenhuma resposta ainda.</div></div>`;
       return;
     }
     body.innerHTML = `<table>
@@ -251,7 +284,7 @@
             <td><div class="lead-muted">${formatDate(r.created_at)}</div></td>
             <td>
               <div class="btn-row">
-                <button class="icon-btn" onclick="showDetail('${r.id}')" title="Ver detalhes">🔍</button>
+                <button class="icon-btn" onclick="showDetail('${r.id}')" title="Ver detalhes"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
               </div>
             </td>
           </tr>`;
@@ -333,6 +366,7 @@
 
   // ── Helpers ────────────────────────────────────────────────
   function escHtml(s)  { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
   function formatDate(iso) {
     if (!iso) return '—';
     const d = new Date(iso);

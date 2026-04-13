@@ -6,22 +6,23 @@
 <title>Quiz</title>
 <script src="/api/env"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary: #5a3af7;
-    --primary-bg: #e8e4ff;
-    --ink: #0d0d12;
-    --muted: #9190a4;
-    --border: #e2e0ee;
+    --primary: #a855f7;
+    --primary-bg: #f3ebff;
+    --ink: #0f0a1e;
+    --muted: #9d8fb0;
+    --border: #e8e0f5;
     --danger: #e5484d;
+    --cta: #fb923c;
     --radius: 14px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
   body {
-    font-family: 'DM Sans', sans-serif;
-    background: #f7f5f0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #f9f7ff;
     min-height: 100vh;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 20px;
@@ -62,8 +63,8 @@
     color: var(--primary); margin-bottom: 16px;
   }
   .question-title {
-    font-family: 'Syne', sans-serif; font-size: clamp(20px, 4vw, 28px);
-    font-weight: 700; letter-spacing: -.5px; margin-bottom: 10px; line-height: 1.2;
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 800; letter-spacing: -.5px; margin-bottom: 10px; line-height: 1.2;
     color: var(--ink);
   }
   .question-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
@@ -91,7 +92,7 @@
   .text-input {
     width: 100%; padding: 16px 18px; border-radius: 12px;
     border: 1.5px solid var(--border); background: #fafafa;
-    font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--ink);
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; color: var(--ink);
     outline: none; transition: border-color .2s; margin-bottom: 24px;
   }
   .text-input:focus { border-color: var(--primary); background: #fff; }
@@ -123,17 +124,17 @@
   .nav-row { display: flex; gap: 10px; align-items: center; }
   .btn-next {
     flex: 1; padding: 16px; border-radius: 12px;
-    background: var(--primary); color: #fff; border: none;
-    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    background: var(--cta); color: #fff; border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700;
     cursor: pointer; transition: all .2s;
-    box-shadow: 0 4px 16px rgba(90,58,247,.35);
+    box-shadow: 0 4px 16px rgba(251,146,60,.4);
   }
   .btn-next:hover { opacity: .9; transform: translateY(-1px); }
   .btn-next:disabled { opacity: .5; cursor: not-allowed; transform: none; }
   .btn-back {
     padding: 16px 18px; border-radius: 12px;
     background: #fafafa; color: var(--muted); border: 1.5px solid var(--border);
-    font-family: 'DM Sans', sans-serif; font-size: 15px; cursor: pointer; transition: all .15s;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; cursor: pointer; transition: all .15s;
   }
   .btn-back:hover { background: var(--border); color: var(--ink); }
 
@@ -145,15 +146,34 @@
     animation: fadeIn .5s cubic-bezier(.16,1,.3,1);
   }
   .success-icon { font-size: 56px; margin-bottom: 16px; }
-  .success-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 12px; }
+  .success-title { font-size: 28px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 12px; }
   .success-msg { font-size: 16px; color: var(--muted); line-height: 1.6; }
+
+  /* ── VIDEO ── */
+  .video-wrapper { position: relative; padding-bottom: 56.25%; border-radius: 14px; overflow: hidden; margin-bottom: 24px; background: #f0ebfa; }
+  .video-wrapper iframe, .video-wrapper video { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+  .btn-next:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+
+  /* ── PICTURE CHOICE ── */
+  .pic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px; }
+  .pic-option {
+    border-radius: 14px; border: 2px solid var(--border); background: #fafafa;
+    cursor: pointer; overflow: hidden; display: flex; flex-direction: column;
+    align-items: center; transition: border-color .2s, background .2s; padding-bottom: 12px;
+  }
+  .pic-option:hover { border-color: var(--primary); background: var(--primary-bg); }
+  .pic-option.selected { border-color: var(--primary); background: var(--primary-bg); }
+  .pic-option img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .pic-option .pic-no-img { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: #f0ebfa; font-size: 40px; }
+  .pic-option .pic-label { font-size: 14px; font-weight: 600; margin-top: 10px; padding: 0 8px; text-align: center; color: var(--ink); }
+  .pic-option.selected .pic-label { color: var(--primary); }
 
   /* ── BRANDING ── */
   .branding {
     position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
     font-size: 12px; color: var(--muted);
   }
-  .branding a { color: var(--primary); text-decoration: none; font-weight: 500; }
+  .branding a { color: var(--primary); text-decoration: none; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -164,15 +184,16 @@
   <div class="screen-center"><div class="spinner"></div></div>
 </div>
 
-<div class="branding">Criado com <a href="/">InLead</a></div>
+<div class="branding">Criado com <a href="/">funnly</a></div>
 
 <script>
-  let supabase = null;
-  let quiz     = null;
-  let questions= [];
-  let current  = 0;
-  let answers  = {};   // questionId → value
-  let responseId = null;
+  let supabase     = null;
+  let quiz         = null;
+  let questions    = [];
+  let integrations = null;
+  let current      = 0;
+  let answers      = {};   // questionId → value
+  let responseId   = null;
 
   async function initSupabase() {
     if (supabase) return supabase;
@@ -198,6 +219,11 @@
       .eq('quiz_id', q.id).order('position');
     questions = (qs||[]).map(q => ({...q, options:(q.options||[]).sort((a,b)=>a.position-b.position)}));
 
+    // Load integrations (pixels/webhook)
+    const { data: intRow } = await sb.from('quiz_integrations').select('*').eq('quiz_id', q.id).single();
+    integrations = intRow || null;
+    if (integrations) injectPixels(integrations);
+
     // Create response record (open)
     const params = new URLSearchParams(location.search);
     const { data: resp } = await sb.from('responses').insert({
@@ -216,8 +242,15 @@
 
   function applyTheme(s) {
     if (s.primaryColor) document.documentElement.style.setProperty('--primary', s.primaryColor);
-    if (s.accentColor)  document.documentElement.style.setProperty('--accent',  s.accentColor);
+    if (s.ctaColor)     document.documentElement.style.setProperty('--cta',     s.ctaColor);
     if (s.bgColor)      document.body.style.background = s.bgColor;
+    if (s.ctaSize || s.ctaShape) {
+      const sizeMap  = { sm: '10px 18px', md: '16px', lg: '20px 40px' };
+      const shapeMap = { square: '6px', rounded: '12px', pill: '999px' };
+      const style = document.createElement('style');
+      style.textContent = `.btn-next { ${s.ctaSize ? `padding:${sizeMap[s.ctaSize]||'16px'};` : ''} ${s.ctaShape ? `border-radius:${shapeMap[s.ctaShape]||'12px'};` : ''} }`;
+      document.head.appendChild(style);
+    }
   }
 
   // ── Render ─────────────────────────────────────────────────
@@ -268,20 +301,60 @@
           ${Array.from({length:11},(_,i)=>`<button class="nps-btn${sel===i?' active':''}" onclick="setNPS(${i})">${i}</button>`).join('')}
         </div>
         <div class="nps-labels"><span>Muito ruim</span><span>Excelente</span></div>`;
+    } else if (q.type === 'picture_choice') {
+      const sel = cur || [];
+      inputHtml = `<div class="pic-grid">
+        ${q.options.map(o=>`
+          <div class="pic-option${sel.includes(o.value)?' selected':''}" onclick="togglePicture('${escJs(o.value)}')">
+            ${o.imageUrl ? `<img src="${escJs(o.imageUrl)}" alt="${escHtml(o.label)}">` : `<div class="pic-no-img">🖼️</div>`}
+            <span class="pic-label">${escHtml(o.label)}</span>
+          </div>`).join('')}
+      </div>`;
     } else if (q.type === 'statement') {
       inputHtml = '';
+    } else if (q.type === 'video') {
+      const videoUrl = q.settings?.videoUrl || '';
+      inputHtml = renderVideoPlayer(videoUrl);
+      // Auto-advance: disable next btn for N seconds
+      if (q.settings?.autoAdvance && q.settings?.autoAdvanceDelay > 0) {
+        setTimeout(() => {
+          const btn = document.getElementById('next-btn');
+          if (btn) { btn.disabled = false; }
+        }, (q.settings.autoAdvanceDelay * 1000));
+      }
+    } else if (q.type === 'video_question') {
+      const videoUrl = q.settings?.videoUrl || '';
+      const subOpts = q.options || [];
+      const cur2 = answers[q.id];
+      const subType = q.settings?.questionSubtype || 'multiple_choice';
+      let questionInputHtml = '';
+      if (subType === 'multiple_choice' || !subType) {
+        questionInputHtml = `<div class="options">
+          ${subOpts.map(o=>`
+            <button class="option${cur2===o.value?' selected':''}" onclick="selectOption('${escJs(o.value)}')">
+              <span class="option-indicator">${cur2===o.value?'✓':''}</span>
+              ${o.emoji?`<span>${o.emoji}</span>`:''}
+              ${escHtml(o.label)}
+            </button>`).join('')}
+        </div>`;
+      }
+      inputHtml = renderVideoPlayer(videoUrl) + questionInputHtml;
     }
+
+    const isVideoOnly = q.type === 'video';
+    const nextLabel = current < questions.length-1 ? 'Próximo →' : 'Concluir ✓';
+    const nextDisabled = isVideoOnly && q.settings?.autoAdvance ? 'disabled' : '';
 
     app.innerHTML = `
       <div class="card">
         <div class="question-count">Pergunta ${current+1} de ${questions.length}</div>
-        <div class="question-title">${escHtml(q.title || 'Sem título')}</div>
+        ${(!isVideoOnly || q.title) ? `<div class="question-title">${escHtml(q.title || 'Sem título')}</div>` : ''}
         ${q.description ? `<div class="question-desc">${escHtml(q.description)}</div>` : ''}
         ${inputHtml}
         <div class="nav-row">
           ${current > 0 ? `<button class="btn-back" onclick="goBack()">←</button>` : ''}
-          <button class="btn-next" id="next-btn" onclick="goNext()">
-            ${current < questions.length-1 ? 'Próximo →' : 'Concluir ✓'}
+          <button class="btn-next" id="next-btn" onclick="goNext()" ${nextDisabled}>
+            ${nextLabel}
           </button>
         </div>
       </div>`;
@@ -319,11 +392,12 @@
     }
 
     current++;
-    // If this was the last question, mark response as complete
+    // If this was the last question, mark response as complete + fire events
     if (current >= questions.length && responseId) {
       const sb = await initSupabase();
       const respondent = buildRespondent();
       await sb.from('responses').update({ respondent, completed_at: new Date().toISOString() }).eq('id', responseId);
+      fireConversionEvents(respondent);
     }
     renderCurrent();
   }
@@ -342,13 +416,23 @@
 
   // ── Get answer with validation ─────────────────────────────
   function getAnswer(q) {
-    if (q.type === 'statement') return '';
+    if (q.type === 'statement' || q.type === 'video') return '';
+    if (q.type === 'video_question') {
+      const v = answers[q.id];
+      if (q.required && !v) { highlightOptions(); return null; }
+      return v || null;
+    }
     if (q.type === 'multiple_choice') {
       const v = answers[q.id];
       if (q.required && !v) { highlightOptions(); return null; }
       return v || null;
     }
     if (q.type === 'checkbox') {
+      const v = answers[q.id] || [];
+      if (q.required && !v.length) { highlightOptions(); return null; }
+      return v;
+    }
+    if (q.type === 'picture_choice') {
       const v = answers[q.id] || [];
       if (q.required && !v.length) { highlightOptions(); return null; }
       return v;
@@ -374,7 +458,7 @@
   }
 
   function highlightOptions() {
-    document.querySelectorAll('.option').forEach(o => { o.style.borderColor = 'var(--danger)'; setTimeout(() => o.style.borderColor = '', 600); });
+    document.querySelectorAll('.option, .pic-option').forEach(o => { o.style.borderColor = 'var(--danger)'; setTimeout(() => o.style.borderColor = '', 600); });
   }
   function showFieldError(msg) {
     const el = document.getElementById('field-error');
@@ -391,6 +475,14 @@
   }
 
   function toggleCheckbox(value) {
+    const id  = questions[current].id;
+    const cur = answers[id] || [];
+    if (cur.includes(value)) answers[id] = cur.filter(v => v !== value);
+    else answers[id] = [...cur, value];
+    renderCurrent();
+  }
+
+  function togglePicture(value) {
     const id  = questions[current].id;
     const cur = answers[id] || [];
     if (cur.includes(value)) answers[id] = cur.filter(v => v !== value);
@@ -424,9 +516,100 @@
       </div>`;
   }
 
+  // ── Pixels & Webhook ───────────────────────────────────────
+  function injectPixels(int) {
+    // Meta Pixel
+    if (int.meta_pixel_id) {
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      window.fbq('init', int.meta_pixel_id);
+      window.fbq('track', 'PageView');
+    }
+    // Google Tag Manager
+    if (int.gtm_id) {
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer',int.gtm_id);
+    }
+    // TikTok Pixel
+    if (int.tiktok_pixel_id) {
+      !function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie'];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var i='https://analytics.tiktok.com/i18n/pixel/events.js';ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=i;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};var o=document.createElement('script');o.type='text/javascript';o.async=!0;o.src=i+'?sdkid='+e+'&lib='+t;var a=document.getElementsByTagName('script')[0];a.parentNode.insertBefore(o,a)};ttq.load(int.tiktok_pixel_id);ttq.page();}(window,document,'ttq');
+    }
+  }
+
+  function fireConversionEvents(respondent) {
+    if (!integrations) return;
+    // Meta Pixel — Lead event
+    if (integrations.meta_pixel_id && window.fbq) {
+      window.fbq('track', 'Lead', {
+        content_name: quiz.title,
+        ...(respondent.email && { em: respondent.email }),
+      });
+    }
+    // GTM — push to dataLayer
+    if (integrations.gtm_id && window.dataLayer) {
+      window.dataLayer.push({
+        event: 'quiz_complete',
+        quiz_id: quiz.id,
+        quiz_title: quiz.title,
+        respondent_email: respondent.email || '',
+        respondent_name: respondent.name || '',
+        respondent_phone: respondent.phone || '',
+      });
+    }
+    // TikTok Pixel
+    if (integrations.tiktok_pixel_id && window.ttq) {
+      window.ttq.track('CompleteRegistration');
+    }
+    // Webhook
+    if (integrations.webhook_url) {
+      const payload = {
+        event: 'quiz_complete',
+        quiz_id: quiz.id,
+        quiz_title: quiz.title,
+        quiz_slug: quiz.slug,
+        response_id: responseId,
+        respondent,
+        answers: Object.entries(answers)
+          .filter(([k]) => k !== '_name')
+          .map(([question_id, value]) => ({ question_id, value })),
+        completed_at: new Date().toISOString(),
+      };
+      fetch(integrations.webhook_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch(() => {}); // fire-and-forget
+    }
+  }
+
   // ── Helpers ────────────────────────────────────────────────
   function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function escJs(s)   { return String(s||'').replace(/'/g,"\\'"); }
+
+  function parseVideoUrl(url) {
+    if (!url) return null;
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const id = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/)?.[1];
+      if (!id) return null;
+      return { type: 'youtube', embedUrl: `https://www.youtube.com/embed/${id}?autoplay=0&rel=0` };
+    }
+    if (url.includes('vimeo.com')) {
+      const id = url.match(/vimeo\.com\/(\d+)/)?.[1];
+      if (!id) return null;
+      return { type: 'vimeo', embedUrl: `https://player.vimeo.com/video/${id}` };
+    }
+    if (url.match(/\.(mp4|webm|ogg)$/i)) {
+      return { type: 'direct', embedUrl: url };
+    }
+    return null;
+  }
+
+  function renderVideoPlayer(videoUrl) {
+    const parsed = parseVideoUrl(videoUrl);
+    if (!parsed) return '';
+    if (parsed.type === 'direct') {
+      return `<div class="video-wrapper"><video src="${escHtml(parsed.embedUrl)}" controls playsinline></video></div>`;
+    }
+    return `<div class="video-wrapper"><iframe src="${escHtml(parsed.embedUrl)}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>`;
+  }
 
   // Enter key to advance
   document.addEventListener('keydown', e => {

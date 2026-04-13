@@ -3,48 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>InLead — Dashboard</title>
+<title>Funnly — Dashboard</title>
+<script>if(localStorage.getItem('funnly-theme')==='dark')document.body.classList.add('dark')</script>
 <script src="/api/env"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
   :root {
-    --ink:    #0d0d12;
-    --paper:  #f7f5f0;
-    --accent: #5a3af7;
-    --glow:   #7c5cfc;
-    --soft:   #e8e4ff;
-    --muted:  #9190a4;
-    --border: #e2e0ee;
+    --ink:    #0f0a1e;
+    --paper:  #f9f7ff;
+    --accent: #a855f7;
+    --glow:   #9333ea;
+    --soft:   #f3ebff;
+    --muted:  #9d8fb0;
+    --border: #e8e0f5;
     --danger: #e5484d;
     --success:#22c55e;
     --warn:   #f59e0b;
+    --cta:    #fb923c;
     --radius: 14px;
-    --shadow: 0 4px 24px rgba(90,58,247,.1);
+    --shadow: 0 4px 24px rgba(168,85,247,.1);
     --sidebar-w: 240px;
   }
+  body.dark {
+    --ink:     #f0ecff;
+    --paper:   #0a0a0f;
+    --surface: #110d1f;
+    --accent:  #a855f7;
+    --glow:    #c084fc;
+    --soft:    #1a1030;
+    --muted:   #7c6f9a;
+    --border:  #1e1a2e;
+    --danger:  #f87171;
+    --success: #4ade80;
+    --shadow:  0 4px 24px rgba(0,0,0,.4);
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; display: flex; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; display: flex; transition: background .2s, color .2s; }
 
   /* ── SIDEBAR ── */
   .sidebar {
-    width: var(--sidebar-w); background: #fff;
+    width: var(--sidebar-w); background: var(--surface, #fff);
     border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
     position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
   }
   .sidebar-logo {
-    padding: 24px 20px;
-    font-family: 'Syne', sans-serif; font-weight: 800;
-    font-size: 20px; color: var(--accent); letter-spacing: -.5px;
-    border-bottom: 1px solid var(--border);
+    padding: 20px;
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 800; font-size: 20px; color: var(--accent); letter-spacing: -.5px;
+    border-bottom: 1px solid var(--border); text-decoration: none;
   }
-  .sidebar-logo span { color: var(--ink); }
+  .sidebar-logo svg { width: 28px; height: 28px; flex-shrink: 0; }
   .sidebar-nav { flex: 1; padding: 16px 12px; }
   .nav-item {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 12px; border-radius: 10px;
-    font-size: 14px; font-weight: 400; color: var(--muted);
+    font-size: 14px; font-weight: 500; color: var(--muted);
     cursor: pointer; transition: all .15s; text-decoration: none;
     margin-bottom: 2px;
   }
@@ -83,31 +99,31 @@
 
   /* ── HEADER ── */
   .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
-  .page-header h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -.5px; }
+  .page-header h1 { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
   .btn-primary {
     display: flex; align-items: center; gap: 8px;
     background: var(--accent); color: #fff;
     padding: 11px 22px; border-radius: 50px;
-    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600;
     border: none; cursor: pointer; transition: all .2s;
-    box-shadow: 0 4px 16px rgba(90,58,247,.3);
+    box-shadow: 0 4px 16px rgba(168,85,247,.3);
   }
   .btn-primary:hover { background: var(--glow); transform: translateY(-1px); }
 
   /* ── STATS ── */
   .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
   .stat-card {
-    background: #fff; border: 1px solid var(--border);
+    background: var(--surface, #fff); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 24px;
   }
   .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+  .stat-value { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
   .stat-value.accent { color: var(--accent); }
 
   /* ── QUIZ GRID ── */
   .quiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
   .quiz-card {
-    background: #fff; border: 1px solid var(--border);
+    background: var(--surface, #fff); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 24px;
     display: flex; flex-direction: column; gap: 16px;
     transition: all .2s; cursor: pointer;
@@ -115,7 +131,7 @@
   }
   .quiz-card:hover { border-color: rgba(90,58,247,.3); box-shadow: var(--shadow); transform: translateY(-2px); }
   .quiz-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-  .quiz-card-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: -.3px; flex: 1; }
+  .quiz-card-title { font-size: 17px; font-weight: 800; letter-spacing: -.3px; flex: 1; }
   .status-badge {
     font-size: 11px; font-weight: 600; padding: 4px 10px;
     border-radius: 50px; flex-shrink: 0; letter-spacing: .5px; text-transform: uppercase;
@@ -129,7 +145,7 @@
   .quiz-actions { display: flex; gap: 8px; }
   .action-btn {
     flex: 1; padding: 9px; border-radius: 8px;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500;
     border: 1.5px solid var(--border); background: transparent; color: var(--ink);
     cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 5px;
   }
@@ -143,7 +159,7 @@
     color: var(--muted);
   }
   .empty-icon { font-size: 48px; margin-bottom: 16px; }
-  .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .empty-state h3 { font-size: 20px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
   .empty-state p  { font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
 
   /* ── MODAL DELETE ── */
@@ -154,25 +170,25 @@
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: #fff; border-radius: 20px;
+    background: var(--surface, #fff); border-radius: 20px;
     padding: 32px; width: 100%; max-width: 380px;
     box-shadow: 0 24px 80px rgba(0,0,0,.2);
     animation: slideUp .25s cubic-bezier(.16,1,.3,1);
   }
   @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  .modal h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+  .modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
   .modal p  { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
   .modal-actions { display: flex; gap: 10px; }
   .btn-cancel {
     flex: 1; padding: 12px; border-radius: 10px;
     border: 1.5px solid var(--border); background: transparent; color: var(--ink);
-    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s;
   }
   .btn-cancel:hover { background: var(--paper); }
   .btn-danger {
     flex: 1; padding: 12px; border-radius: 10px;
     border: none; background: var(--danger); color: #fff;
-    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s;
   }
   .btn-danger:hover { opacity: .88; }
 
@@ -182,14 +198,14 @@
   .form-group input {
     width: 100%; padding: 12px 14px;
     border: 1.5px solid var(--border); border-radius: 10px;
-    font-family: 'DM Sans', sans-serif; font-size: 15px;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px;
     outline: none; transition: border-color .2s; background: #fafafa; color: var(--ink);
   }
-  .form-group input:focus { border-color: var(--accent); background: #fff; }
+  .form-group input:focus { border-color: var(--accent); background: var(--surface, #fff); }
   .modal-btn {
     width: 100%; padding: 14px; border-radius: 10px;
-    background: var(--accent); color: #fff; border: none;
-    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    background: var(--cta); color: #fff; border: none;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700;
     cursor: pointer; transition: background .2s;
   }
   .modal-btn:hover { background: var(--glow); }
@@ -215,24 +231,35 @@
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="sidebar-logo">In<span>Lead</span></div>
+  <a href="/dashboard.html" class="sidebar-logo">
+    <svg viewBox="0 0 52 52" fill="none">
+      <rect x="4" y="5" width="44" height="9" rx="4.5" fill="#a855f7"/>
+      <rect x="10" y="18" width="32" height="8" rx="4" fill="#a855f7" opacity="0.65"/>
+      <rect x="18" y="30" width="16" height="7" rx="3.5" fill="#a855f7" opacity="0.4"/>
+      <path d="M22 40 L26 47 L30 40" stroke="#fb923c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    funnly
+  </a>
   <nav class="sidebar-nav">
     <a href="/dashboard.html" class="nav-item active">
-      <span class="nav-icon">📋</span> Meus quizzes
+      <span class="nav-icon"><i data-lucide="layout-grid" style="width:17px;height:17px"></i></span> Meus quizzes
     </a>
-    <a href="#" class="nav-item" id="nav-docs" onclick="alert('Em breve!')">
-      <span class="nav-icon">📖</span> Documentação
+    <a href="/integrations.html" class="nav-item">
+      <span class="nav-icon"><i data-lucide="plug" style="width:17px;height:17px"></i></span> Integrações
+    </a>
+    <a href="/settings.html" class="nav-item">
+      <span class="nav-icon"><i data-lucide="settings" style="width:17px;height:17px"></i></span> Configurações
     </a>
   </nav>
   <div class="sidebar-footer">
-    <div class="user-block">
+    <a href="/settings.html" class="user-block" style="text-decoration:none">
       <div class="avatar" id="user-avatar">?</div>
       <div class="user-info">
         <div class="user-name" id="user-name">Carregando...</div>
         <div class="user-email" id="user-email"></div>
       </div>
-      <button class="logout-btn" onclick="handleLogout()" title="Sair">↩</button>
-    </div>
+      <button class="logout-btn" onclick="handleLogout()" title="Sair"><i data-lucide="log-out" style="width:16px;height:16px"></i></button>
+    </a>
   </div>
 </aside>
 
@@ -360,7 +387,7 @@
     if (!quizzes.length) {
       grid.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">📋</div>
+          <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6"/><path d="M9 12h6"/><path d="M9 15h4"/></svg></div>
           <h3>Nenhum quiz ainda</h3>
           <p>Clique em "Novo quiz" para criar seu primeiro funil de captação.</p>
         </div>`;
@@ -377,10 +404,10 @@
           <div class="quiz-stat"><strong>${q.completion_rate || 0}%</strong>conclusão</div>
         </div>
         <div class="quiz-actions">
-          <button class="action-btn" onclick="openBuilder('${q.id}')">✏️ Editar</button>
-          <button class="action-btn" onclick="openResults('${q.id}')">📊 Leads</button>
-          <button class="action-btn" onclick="copyLink('${q.slug}')">🔗 Link</button>
-          <button class="action-btn danger" onclick="openDeleteModal('${q.id}')">🗑️</button>
+          <button class="action-btn" onclick="openBuilder('${q.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar</button>
+          <button class="action-btn" onclick="openResults('${q.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Leads</button>
+          <button class="action-btn" onclick="copyLink('${q.slug}')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Link</button>
+          <button class="action-btn danger" onclick="openDeleteModal('${q.id}')"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
         </div>
       </div>`).join('');
   }
@@ -388,7 +415,7 @@
   function renderError() {
     document.getElementById('quiz-grid').innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">⚠️</div>
+        <div class="empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--danger)"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <h3>Erro ao carregar</h3>
         <p>Verifique sua conexão e recarregue a página.</p>
       </div>`;
@@ -447,6 +474,7 @@
 
   // ── Helpers ────────────────────────────────────────────────
   function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
   function statusLabel(s) { return { draft: 'Rascunho', published: 'Publicado', archived: 'Arquivado' }[s] || s; }
 
   // Enter no campo de criação
